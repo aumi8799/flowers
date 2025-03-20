@@ -1,28 +1,28 @@
 <x-action-section>
     <x-slot name="title">
-        {{ __('Two Factor Authentication') }}
+        {{ __('Dviejų faktorių autentifikacija') }}
     </x-slot>
 
     <x-slot name="description">
-        {{ __('Add additional security to your account using two factor authentication.') }}
+        {{ __('Pridėkite papildomą saugumą prie savo paskyros naudodami dviejų faktorių autentifikaciją.') }}
     </x-slot>
 
     <x-slot name="content">
         <h3 class="text-lg font-medium text-gray-900">
             @if ($this->enabled)
                 @if ($showingConfirmation)
-                    {{ __('Finish enabling two factor authentication.') }}
+                    {{ __('Baigkite įjungti dviejų faktorių autentifikaciją.') }}
                 @else
-                    {{ __('You have enabled two factor authentication.') }}
+                    {{ __('Dviejų faktorių autentifikacija įjungta.') }}
                 @endif
             @else
-                {{ __('You have not enabled two factor authentication.') }}
+                {{ __('Dviejų faktorių autentifikacija nėra įjungta.') }}
             @endif
         </h3>
 
         <div class="mt-3 max-w-xl text-sm text-gray-600">
             <p>
-                {{ __('When two factor authentication is enabled, you will be prompted for a secure, random token during authentication. You may retrieve this token from your phone\'s Google Authenticator application.') }}
+                {{ __('Kai įjungiama dviejų faktorių autentifikacija, jums bus paprašyta įvesti saugų, atsitiktinį kodą autentifikacijos metu. Šį kodą galite gauti iš savo telefono Google Authenticator programėlės.') }}
             </p>
         </div>
 
@@ -31,9 +31,9 @@
                 <div class="mt-4 max-w-xl text-sm text-gray-600">
                     <p class="font-semibold">
                         @if ($showingConfirmation)
-                            {{ __('To finish enabling two factor authentication, scan the following QR code using your phone\'s authenticator application or enter the setup key and provide the generated OTP code.') }}
+                            {{ __('Norėdami baigti įjungti dviejų faktorių autentifikaciją, nuskenuokite šį QR kodą naudodami savo telefono autentifikavimo programėlę arba įveskite nustatymo raktą ir pateikite sugeneruotą OTP kodą.') }}
                         @else
-                            {{ __('Two factor authentication is now enabled. Scan the following QR code using your phone\'s authenticator application or enter the setup key.') }}
+                            {{ __('Dviejų faktorių autentifikacija dabar įjungta. Nuskenuokite šį QR kodą naudodami savo telefono autentifikavimo programėlę arba įveskite nustatymo raktą.') }}
                         @endif
                     </p>
                 </div>
@@ -44,13 +44,13 @@
 
                 <div class="mt-4 max-w-xl text-sm text-gray-600">
                     <p class="font-semibold">
-                        {{ __('Setup Key') }}: {{ decrypt($this->user->two_factor_secret) }}
+                        {{ __('Nustatymo raktas') }}: {{ decrypt($this->user->two_factor_secret) }}
                     </p>
                 </div>
 
                 @if ($showingConfirmation)
                     <div class="mt-4">
-                        <x-label for="code" value="{{ __('Code') }}" />
+                        <x-label for="code" value="{{ __('Kodėlis') }}" />
 
                         <x-input id="code" type="text" name="code" class="block mt-1 w-1/2" inputmode="numeric" autofocus autocomplete="one-time-code"
                             wire:model="code"
@@ -64,7 +64,7 @@
             @if ($showingRecoveryCodes)
                 <div class="mt-4 max-w-xl text-sm text-gray-600">
                     <p class="font-semibold">
-                        {{ __('Store these recovery codes in a secure password manager. They can be used to recover access to your account if your two factor authentication device is lost.') }}
+                        {{ __('Saugojame šiuos atkūrimo kodus saugiame slaptažodžių tvarkytuve. Jie gali būti naudojami atkuriant prieigą prie jūsų paskyros, jei prarandate dviejų faktorių autentifikavimo įrenginį.') }}
                     </p>
                 </div>
 
@@ -80,26 +80,26 @@
             @if (! $this->enabled)
                 <x-confirms-password wire:then="enableTwoFactorAuthentication">
                     <x-button type="button" wire:loading.attr="disabled">
-                        {{ __('Enable') }}
+                        {{ __('Įjungti') }}
                     </x-button>
                 </x-confirms-password>
             @else
                 @if ($showingRecoveryCodes)
                     <x-confirms-password wire:then="regenerateRecoveryCodes">
                         <x-secondary-button class="me-3">
-                            {{ __('Regenerate Recovery Codes') }}
+                            {{ __('Sugeneruoti atkūrimo kodus iš naujo') }}
                         </x-secondary-button>
                     </x-confirms-password>
                 @elseif ($showingConfirmation)
                     <x-confirms-password wire:then="confirmTwoFactorAuthentication">
                         <x-button type="button" class="me-3" wire:loading.attr="disabled">
-                            {{ __('Confirm') }}
+                            {{ __('Patvirtinti') }}
                         </x-button>
                     </x-confirms-password>
                 @else
                     <x-confirms-password wire:then="showRecoveryCodes">
                         <x-secondary-button class="me-3">
-                            {{ __('Show Recovery Codes') }}
+                            {{ __('Rodyti atkūrimo kodus') }}
                         </x-secondary-button>
                     </x-confirms-password>
                 @endif
@@ -107,17 +107,16 @@
                 @if ($showingConfirmation)
                     <x-confirms-password wire:then="disableTwoFactorAuthentication">
                         <x-secondary-button wire:loading.attr="disabled">
-                            {{ __('Cancel') }}
+                            {{ __('Atšaukti') }}
                         </x-secondary-button>
                     </x-confirms-password>
                 @else
                     <x-confirms-password wire:then="disableTwoFactorAuthentication">
                         <x-danger-button wire:loading.attr="disabled">
-                            {{ __('Disable') }}
+                            {{ __('Išjungti') }}
                         </x-danger-button>
                     </x-confirms-password>
                 @endif
-
             @endif
         </div>
     </x-slot>

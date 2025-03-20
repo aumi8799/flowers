@@ -5,7 +5,7 @@
         <meta name="viewport" content="width=device-width, initial-scale=1">
         <meta name="csrf-token" content="{{ csrf_token() }}">
 
-        <title>{{ config('app.name', 'Laravel') }}</title>
+        <title>{{ config('app.name', 'Bloom&sBliss') }}</title>
 
         <!-- Fonts -->
         <link rel="preconnect" href="https://fonts.bunny.net">
@@ -17,11 +17,14 @@
         <!-- Styles -->
         @livewireStyles
     </head>
-    <body>
-        <div class="font-sans text-gray-900 antialiased">
-            {{ $slot }}
-        </div>
+    <body class="bg-cover bg-center" style="background-image: url('{{ asset('images/your-image.jpg') }}');">
+    <div class="font-sans text-gray-900 antialiased">
+        {{ $slot }}
+    </div>
 
-        @livewireScripts
-    </body>
+    @livewireScripts
+</body>
+
+
+
 </html>
