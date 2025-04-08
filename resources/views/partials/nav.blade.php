@@ -68,22 +68,6 @@
 
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css">
 
-<script>
-    document.querySelector(".search-container").addEventListener("click", function() {
-        this.classList.add("active");
-        this.querySelector(".search-input").focus();
-    });
-
-    document.addEventListener("click", function(event) {
-        let searchBox = document.querySelector(".search-container");
-        if (!searchBox.contains(event.target) && searchBox.classList.contains("active")) {
-            searchBox.classList.remove("active");
-        }
-    });
-</script>
-
-<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css">
-
 <nav class="navbar navbar-expand-lg navbar-light bg-white">
     <div class="container">
         <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav" aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">

@@ -28,8 +28,8 @@
         </form>
     </div>
     
-    <div class="product-list">
-    @foreach ($products as $product)
+    <div class="product-list" id="product-list">
+        @foreach ($products as $product)
             <div class="product-item">
                 <img src="{{ asset('images/products/' . $product->image) }}" alt="{{ $product->name }}" class="product-image">
                 <div class="product-details">
@@ -41,7 +41,11 @@
                     </form>
                 </div>
             </div>
-    @endforeach
-</div>
+        @endforeach
+    </div>
+
+    <div class="text-center">
+        <button id="load-more" class="add-to-cart-btn">Rodyti daugiau</button>
+    </div>
 @endsection
 

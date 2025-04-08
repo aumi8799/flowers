@@ -9,7 +9,7 @@ class SearchController extends Controller
 {
     public function index(Request $request)
     {
-        $query = $request->input('query'); // Paieškos užklausa
+        $query = $request->input('query');
     
         $products = Product::when($query, function ($queryBuilder) use ($query) {
             return $queryBuilder->where('name', 'like', '%' . $query . '%')
