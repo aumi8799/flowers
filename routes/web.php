@@ -54,8 +54,10 @@ Route::get('/catalog/puokstes', [CatalogController::class, 'puokstes'])->name('c
 Route::get('/catalog/geles-dezuteje', [CatalogController::class, 'gelesDezuteje'])->name('catalog.geles-dezuteje');
 Route::get('/catalog/miegancios-rozes', [CatalogController::class, 'mieganciosRoze'])->name('catalog.miegancios-rozes');
 
-Route::get('/orders', function () {
-    return view('orders'); 
+
+use App\Http\Controllers\OrderController;
+Route::middleware(['auth'])->group(function () {
+    Route::get('/orders', [OrderController::class, 'myOrders'])->name('orders.index');
 });
 
 Route::get('/addresses', function () {
@@ -67,3 +69,5 @@ Route::get('/search', [SearchController::class, 'index'])->name('search');
 use App\Http\Controllers\ProductController;
 
 Route::get('/product/{id}', [ProductController::class, 'show'])->name('product.show');
+
+

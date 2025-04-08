@@ -3,44 +3,77 @@
 @section('title', 'Užsakymai')
 
 @section('content')
-    <header class="py-5" style="background: url('{{ asset('images/header-bg.jpg') }}') no-repeat center center; background-size: cover; height: 200px; display: flex; align-items: center; justify-content: center;">
-        <div class="container px-4 px-lg-5 my-5">
-            <div class="text-center text-dark-gray">
+<header class="py-5" style="background: url('{{ asset('images/header-bg.jpg') }}') no-repeat center center; background-size: cover; height: 200px; display: flex; align-items: center; justify-content: center;">
+    <div class="container px-4 px-lg-5 my-5">
+        <div class="text-center text-dark-gray">
             <h1 class="display-4 fw-bolder">Užsakymai</h1>
-            <p class="lead fw-normal text-dark-gray mb-0"></p>
-            </div>
         </div>
-    </header>
+    </div>
+</header>
 
-    <div class="container my-5">
+<div class="container my-5">
     <div class="row">
         <div class="col-md-3">
             <div class="p-5 mb-3 bg-white border text-center text-gray" style="border-radius: 0;">
                 <h5 class="mb-0">Sveiki, {{ Auth::user()->name }}!</h5>
             </div>
             <div class="list-group">
-                <a href="/dashboard" class="list-group-item list-group-item-action" style="border-radius: 0;">
-                    <i class="far fa-tachometer-alt"></i> Skydelis
-                </a>
-                <a href="/orders" class="list-group-item list-group-item-action active" style="border-radius: 0;">
-                    <i class="far fa-clipboard-list"></i> Užsakymai
-                </a>
-                <a href="#" class="list-group-item list-group-item-action" style="border-radius: 0;">
-                    <i class="fas fa-download"></i> Atsisiuntimai
-                </a>
-                <a href="/addresses" class="list-group-item list-group-item-action" style="border-radius: 0;">
-                    <i class="far fa-map-marker-alt"></i> Adresai
-                </a>
-                <a href="{{ route('profile.show') }}" class="list-group-item list-group-item-action" style="border-radius: 0;">
-                    <i class="far fa-user"></i> Vartotojo informacija
-                </a>
-                <a href="#" class="list-group-item list-group-item-action logout-link" onclick="event.preventDefault(); document.getElementById('logout-form').submit();" style="border-radius: 0;">
-                        <i class="fas fa-sign-out-alt"></i> Atsijungti
-                    </a>
-                    <form id="logout-form" method="POST" action="{{ route('logout') }}" style="display: none;">
-                        @csrf
-                    </form>
+                <a href="/dashboard" class="list-group-item list-group-item-action">Skydelis</a>
+                <a href="/orders" class="list-group-item list-group-item-action active">Užsakymai</a>
+                <a href="#" class="list-group-item list-group-item-action">Atsisiuntimai</a>
+                <a href="/addresses" class="list-group-item list-group-item-action">Adresai</a>
+                <a href="{{ route('profile.show') }}" class="list-group-item list-group-item-action">Vartotojo informacija</a>
+                <a href="#" class="list-group-item list-group-item-action logout-link"
+                   onclick="event.preventDefault(); document.getElementById('logout-form').submit();">Atsijungti</a>
+                <form id="logout-form" method="POST" action="{{ route('logout') }}" style="display: none;">
+                    @csrf
+                </form>
             </div>
         </div>
 
+        <div class="col-md-9">
+            <h2>Mano užsakymai</h2>
+
+            <form method="GET" action="{{ route('orders.index') }}" class="mb-4">
+                <label for="status">Filtruoti pagal būseną:</label>
+                <select name="status" id="status" onchange="this.form.submit()" class="form-select w-auto d-inline-block">
+                    <option value="">Visi</option>
+                    <option value="rezervuotas" {{ request('status') == 'rezervuotas' ? 'selected' : '' }}>Rezervuotas</option>
+                    <option value="apmokėtas" {{ request('status') == 'apmokėtas' ? 'selected' : '' }}>Apmokėtas</option>
+                    <option value="pristatytas" {{ request('status') == 'pristatytas' ? 'selected' : '' }}>Pristatytas</option>
+                    <option value="atšauktas" {{ request('status') == 'atšauktas' ? 'selected' : '' }}>Atšauktas</option>
+                </select>
+            </form>
+
+            <table class="table">
+                <thead>
+                    <tr>
+                        <th>Data</th>
+                        <th>Būsena</th>
+                        <th>Suma</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @forelse($orders as $order)
+                        <tr>
+                            <td>{{ $order->created_at->format('Y-m-d H:i') }}</td>
+                            <td>{{ ucfirst($order->status) }}</td>
+                            <td>{{ number_format($order->total, 2) }} €</td>
+                        </tr>
+                    @empty
+                        <tr>
+                            <td colspan="3" class="text-center p-5">
+                                <div class="alert alert-info mb-0">
+                                    Šiuo metu neturite užsakymų. 🌸
+                                    <br>
+                                    Apsilankykite <a href="{{ url('/') }}">pagrindiniame puslapyje</a> ir išsirinkite gėlių!
+                                </div>
+                            </td>
+                        </tr>
+                    @endforelse
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
 @endsection
