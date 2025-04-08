@@ -7,7 +7,7 @@ use Illuminate\Http\Request;
 
 class CatalogController extends Controller
 {
-    // Bendras filtravimo metodas su kainų diapazonu
+    // Bendras filtravimo metodas su kainų diapazonu ir puslapio parametru
     protected function filterByPrice(Request $request, $category = null)
     {
         $query = Product::query();
@@ -26,7 +26,8 @@ class CatalogController extends Controller
             $query->where('price', '<=', $request->max_price);
         }
 
-        return $query->get();
+        // Puslapio parametras (pagal numatytuosius nustatymus 10 elementų per puslapį)
+        return $query->paginate(9);
     }
 
     // Pagrindinis katalogo puslapis su filtravimu
@@ -67,5 +68,19 @@ class CatalogController extends Controller
         $products = $this->filterByPrice($request, 'miegancios_rozes');
 
         return view('catalog.miegancios-rozes', compact('products'));
+    }
+
+    // AJAX užklausa, kad gauti papildomus produktus
+    public function loadMoreProducts(Request $request)
+    {
+        $category = $request->category; // Kategorija (pvz., 'miegancios_rozes')
+        $products = $this->filterByPrice($request, $category);
+
+        // Jei tai AJAX užklausa, grąžinsime tik produktų fragmentą
+        if ($request->ajax()) {
+            return view('catalog.products_fragment', compact('products'))->render();
+        }
+
+        return redirect()->route('catalog.miegancios-rozes');
     }
 }

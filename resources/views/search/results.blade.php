@@ -11,10 +11,13 @@
         </div>
     </header>
 
-    <div class="product-list">
-        @if ($products->isEmpty() && empty($navResults))
-            <p>Nerasta rezultatų pagal jūsų užklausą: "{{ $query }}"</p>
+        @if ($products->isEmpty())
+         <div class="text-center my-5">
+                <img src="{{ asset('images/not_found.png') }}" alt="Tuščias krepšelis" class="img-fluid" style="max-width: 150px;">
+                <p>Nerasta rezultatų pagal jūsų užklausą: "{{ $query }}"</p>
+            </div>
         @else
+        <div class="product-list">
             @foreach ($products as $product)
                 <a href="{{ route('product.show', $product->id) }}" class="product-link">
                     <div class="product-item">
@@ -33,6 +36,7 @@
                     </div>
                 </a>
             @endforeach
+            </div>
         @endif
-    </div>
+   
 @endsection
