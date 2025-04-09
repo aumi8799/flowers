@@ -63,6 +63,14 @@ Route::middleware(['auth'])->group(function () {
 // Rezervacijos užsakymas
 Route::post('/order/reserve', [OrderController::class, 'reserve'])->name('order.reserve');
 
+// Rezervacijos atšaukimas
+Route::delete('/orders/{order}', [OrderController::class, 'destroy'])->name('orders.destroy');
+
+// Rezervacijos redagavimas
+Route::get('/orders/{order}/edit', [OrderController::class, 'edit'])->name('orders.edit');
+Route::put('/orders/{order}', [OrderController::class, 'update'])->name('orders.update');
+
+
 // Užsakymų rodymas
 Route::get('/orders', [OrderController::class, 'myOrders'])->name('orders.index');
 Route::get('/orders/{order}', [OrderController::class, 'show'])->name('orders.show');

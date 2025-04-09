@@ -56,4 +56,75 @@ class OrderController extends Controller
         return view('orders.show', compact('order'));
     }
     
+
+    // Atšaukiame rezervaciją
+    public function destroy(Order $order)
+    {
+        if ($order->user_id !== auth()->id()) {
+            abort(403, 'Negalite atšaukti šio užsakymo.');
+        }
+
+        if ($order->status === 'atšauktas' || $order->status === 'pristatytas') {
+            return redirect()->route('orders.index')->with('error', 'Šio užsakymo atšaukti nebegalima.');
+        }
+
+        $order->status = 'atšauktas';
+        $order->save();
+
+        return redirect()->route('orders.index')->with('success', 'Užsakymas sėkmingai atšauktas.');
+    }
+
+    // Redaguoti užsakymą
+    public function edit(Order $order)
+        {
+            if ($order->user_id !== auth()->id()) {
+                abort(403, 'Neturite teisės redaguoti šio užsakymo.');
+            }
+
+            if ($order->status !== 'rezervuotas') {
+                return redirect()->route('orders.index')->with('error', 'Tik rezervuotus užsakymus galima redaguoti.');
+            }
+
+            return view('orders.edit', compact('order'));
+        }
+
+    // Redaguoti rezervaciją
+
+    public function update(Request $request, Order $order)
+    {
+        if ($order->user_id !== auth()->id()) {
+            abort(403, 'Negalite redaguoti šio užsakymo.');
+        }
+
+        if ($order->status !== 'rezervuotas') {
+            return redirect()->route('orders.show', $order->id)->with('error', 'Tik rezervuotus užsakymus galima redaguoti.');
+        }
+
+        $request->validate([
+            'delivery_city' => 'required|integer',
+            'quantities' => 'required|array',
+        ]);
+
+        // Atnaujinti pristatymo miestą
+        $order->delivery_city = $request->delivery_city;
+
+        $total = 0;
+
+        // Atnaujinti prekių kiekius ir perskaičiuoti bendrą sumą
+        foreach ($order->items as $item) {
+            if (isset($request->quantities[$item->id])) {
+                $item->quantity = $request->quantities[$item->id];
+                $item->save();
+
+                $total += $item->quantity * $item->price;
+            }
+        }
+
+        $order->total_price = $total;
+        $order->save();
+
+        return redirect()->route('orders.show', $order->id)->with('success', 'Užsakymas atnaujintas sėkmingai!');
+    }
+
+
 }

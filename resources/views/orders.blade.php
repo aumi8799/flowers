@@ -71,6 +71,7 @@
                 <p>Rezervacijos laikas: {{ $order->created_at->format('Y-m-d H:i:s') }}</p>
                 <a href="{{ route('orders.show', $order->id) }}" class="text-success">Peržiūrėti detales</a>
 
+
             </div>
         </div>
     @endforeach

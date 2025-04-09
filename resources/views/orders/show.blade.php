@@ -86,12 +86,21 @@
                             <h4 style="font-weight: normal; font-size: 1rem;">Rezervacijos laikas: <span>{{ $order->created_at->format('Y-m-d H:i:s') }}</span></h4>
                         </div>
                         <div class="d-flex justify-content-end gap-2 mt-4">
-                            <form action="" method="">
-                                <button type="submit" class="btn btn-dark ">Redaguoti</button>
-                            </form>
-                            <form action="" method="">
-                                <button type="submit" class="btn btn-danger">Atšaukti rezervaciją</button>
-                            </form>
+                            @if($order->status === 'rezervuotas')
+                                <div class="d-flex justify-content-end gap-2 mt-4">
+                                    {{-- Redagavimo mygtukas --}}
+                                    <form action="{{ route('orders.edit', $order->id) }}" method="GET">
+                                        <button type="submit" class="btn btn-dark">Redaguoti</button>
+                                    </form>
+
+                                    {{-- Atšaukimo mygtukas --}}
+                                    <form action="{{ route('orders.destroy', $order->id) }}" method="POST" onsubmit="return confirm('Ar tikrai norite atšaukti šį užsakymą?');">
+                                        @csrf
+                                        @method('DELETE')
+                                        <button type="submit" class="btn btn-danger">Atšaukti rezervaciją</button>
+                                    </form>
+                                </div>
+                            @endif
                         </div>
                     </div>
                 </div>

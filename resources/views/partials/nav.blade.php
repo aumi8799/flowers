@@ -26,7 +26,7 @@
                         <ul class="dropdown-menu-custom">
                             <li><a class="dropdown-item-custom" href="/dashboard">Skydelis</a></li>
                             <li><a class="dropdown-item-custom" href="/orders">Užsakymai</a></li>
-                            <li><a class="dropdown-item-custom" href="#">Atsisiutimai</a></li>
+                            <li><a class="dropdown-item-custom" href="#">Atsisiuntimai</a></li>
                             <li><a class="dropdown-item-custom" href="/addresses">Adresai</a></li>
                             <li><a class="dropdown-item-custom" href="{{ route('profile.show') }}">Vartotojo informacija</a></li>
                             <li>
