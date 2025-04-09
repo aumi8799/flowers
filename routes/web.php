@@ -65,6 +65,7 @@ Route::post('/order/reserve', [OrderController::class, 'reserve'])->name('order.
 
 // Užsakymų rodymas
 Route::get('/orders', [OrderController::class, 'myOrders'])->name('orders.index');
+Route::get('/orders/{order}', [OrderController::class, 'show'])->name('orders.show');
 
 Route::get('/addresses', function () {
     return view('addresses'); 

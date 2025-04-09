@@ -45,17 +45,41 @@
     </select>
 </form>
 
+@if($orders->isEmpty())
+    <div class="alert alert-info mb-0 text-center">
+        Šiuo metu neturite užsakymų. 🌸
+        <br>
+        Apsilankykite <a href="{{ url('/') }}">pagrindiniame puslapyje</a> ir išsirinkite gėlių!
+    </div>
+@else
 <div class="list-group">
     @foreach($orders as $order)
-        <div class="list-group-item">
-            <h5>Užsakymo ID: #{{ $order->id }}</h5>
-            <p>Pristatymo miestas: {{ $order->delivery_city }}</p>
-            <p>Būsena: {{ $order->status }}</p>
-            <p>Kaina: {{ $order->total_price }} €</p>
-            <p>Data: {{ $order->created_at->format('Y-m-d H:i:s') }}</p>
+        <div class="list-group-item d-flex justify-content-between align-items-center">
+            <div>
+                <h5>Užsakymo ID: <a href="{{ route('orders.show', $order->id) }}" class="text-success" >#{{ $order->id }}</a></h5>
+                <p>Pristatymo miestas: 
+                    @if($order->delivery_city == 7)
+                        Vilnius
+                    @elseif($order->delivery_city == 10)
+                        Kaunas
+                    @else
+                        Nenurodytas miestas
+                    @endif
+                </p>
+                <p>Būsena: {{ $order->status }}</p>
+                <p>Kaina: {{ $order->total_price }} €</p>
+                <p>Rezervacijos laikas: {{ $order->created_at->format('Y-m-d H:i:s') }}</p>
+                <a href="{{ route('orders.show', $order->id) }}" class="text-success">Peržiūrėti detales</a>
+
+            </div>
         </div>
     @endforeach
 </div>
+
+
+    </div>
+@endif
+
         </div>
     </div>
 </div>

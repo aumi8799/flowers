@@ -2,14 +2,20 @@
 
 namespace App\Models;
 
+use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 
 class Order extends Model
 {
-    protected $fillable = ['user_id', 'delivery_city', 'total_price', 'status'];
+    use HasFactory;
 
-    public function user()
+    protected $fillable = [
+        'user_id', 'delivery_city', 'total_price', 'status'
+    ];
+
+    // Ryšys su užsakymo prekėmis
+    public function items()
     {
-        return $this->belongsTo(User::class);
+        return $this->hasMany(OrderItem::class);
     }
 }
