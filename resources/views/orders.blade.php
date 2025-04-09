@@ -32,47 +32,30 @@
         </div>
 
         <div class="col-md-9">
-            <h2>Mano užsakymai</h2>
+        <h2>Mano užsakymai</h2>
 
-            <form method="GET" action="{{ route('orders.index') }}" class="mb-4">
-                <label for="status">Filtruoti pagal būseną:</label>
-                <select name="status" id="status" onchange="this.form.submit()" class="form-select w-auto d-inline-block">
-                    <option value="">Visi</option>
-                    <option value="rezervuotas" {{ request('status') == 'rezervuotas' ? 'selected' : '' }}>Rezervuotas</option>
-                    <option value="apmokėtas" {{ request('status') == 'apmokėtas' ? 'selected' : '' }}>Apmokėtas</option>
-                    <option value="pristatytas" {{ request('status') == 'pristatytas' ? 'selected' : '' }}>Pristatytas</option>
-                    <option value="atšauktas" {{ request('status') == 'atšauktas' ? 'selected' : '' }}>Atšauktas</option>
-                </select>
-            </form>
+<form method="GET" action="{{ route('orders.index') }}" class="mb-4">
+    <label for="status">Filtruoti pagal būseną:</label>
+    <select name="status" id="status" onchange="this.form.submit()" class="form-select w-auto d-inline-block">
+        <option value="">Visi</option>
+        <option value="rezervuotas" {{ request('status') == 'rezervuotas' ? 'selected' : '' }}>Rezervuotas</option>
+        <option value="apmokėtas" {{ request('status') == 'apmokėtas' ? 'selected' : '' }}>Apmokėtas</option>
+        <option value="pristatytas" {{ request('status') == 'pristatytas' ? 'selected' : '' }}>Pristatytas</option>
+        <option value="atšauktas" {{ request('status') == 'atšauktas' ? 'selected' : '' }}>Atšauktas</option>
+    </select>
+</form>
 
-            <table class="table">
-                <thead>
-                    <tr>
-                        <th>Data</th>
-                        <th>Būsena</th>
-                        <th>Suma</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    @forelse($orders as $order)
-                        <tr>
-                            <td>{{ $order->created_at->format('Y-m-d H:i') }}</td>
-                            <td>{{ ucfirst($order->status) }}</td>
-                            <td>{{ number_format($order->total, 2) }} €</td>
-                        </tr>
-                    @empty
-                        <tr>
-                            <td colspan="3" class="text-center p-5">
-                                <div class="alert alert-info mb-0">
-                                    Šiuo metu neturite užsakymų. 🌸
-                                    <br>
-                                    Apsilankykite <a href="{{ url('/') }}">pagrindiniame puslapyje</a> ir išsirinkite gėlių!
-                                </div>
-                            </td>
-                        </tr>
-                    @endforelse
-                </tbody>
-            </table>
+<div class="list-group">
+    @foreach($orders as $order)
+        <div class="list-group-item">
+            <h5>Užsakymo ID: #{{ $order->id }}</h5>
+            <p>Pristatymo miestas: {{ $order->delivery_city }}</p>
+            <p>Būsena: {{ $order->status }}</p>
+            <p>Kaina: {{ $order->total_price }} €</p>
+            <p>Data: {{ $order->created_at->format('Y-m-d H:i:s') }}</p>
+        </div>
+    @endforeach
+</div>
         </div>
     </div>
 </div>

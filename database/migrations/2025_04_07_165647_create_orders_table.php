@@ -4,27 +4,22 @@ use Illuminate\Database\Migrations\Migration;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Support\Facades\Schema;
 
-return new class extends Migration
+class CreateOrdersTable extends Migration
 {
-    /**
-     * Run the migrations.
-     */
-    public function up(): void
+    public function up()
     {
         Schema::create('orders', function (Blueprint $table) {
             $table->id();
-            $table->foreignId('user_id')->constrained()->onDelete('cascade');
-            $table->decimal('total', 10, 2);
-            $table->enum('status', ['rezervuotas', 'apmokėtas', 'pristatytas', 'atšauktas'])->default('rezervuotas');
+            $table->foreignId('user_id')->constrained()->onDelete('cascade'); // Užsakymo vartotojo ID
+            $table->string('delivery_city'); // Pristatymo miestas
+            $table->decimal('total_price', 8, 2); // Užsakymo kaina
+            $table->string('status')->default('rezervuotas'); // Užsakymo statusas
             $table->timestamps();
         });
     }
 
-    /**
-     * Reverse the migrations.
-     */
-    public function down(): void
+    public function down()
     {
         Schema::dropIfExists('orders');
     }
-};
+}

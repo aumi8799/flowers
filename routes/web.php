@@ -60,6 +60,12 @@ Route::middleware(['auth'])->group(function () {
     Route::get('/orders', [OrderController::class, 'myOrders'])->name('orders.index');
 });
 
+// Rezervacijos užsakymas
+Route::post('/order/reserve', [OrderController::class, 'reserve'])->name('order.reserve');
+
+// Užsakymų rodymas
+Route::get('/orders', [OrderController::class, 'myOrders'])->name('orders.index');
+
 Route::get('/addresses', function () {
     return view('addresses'); 
 });

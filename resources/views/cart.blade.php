@@ -71,7 +71,7 @@
                         <hr>
                         <h5>Pristatymo išlaidos:</h5>
                         <div class="mb-3">
-                            <select class="form-select" id="delivery-city" onchange="updateShippingCost()">
+                            <select class="form-select" id="delivery-city-select" onchange="updateShippingCost()">
                                 <option value="" disabled selected>Pasirinkite miestą</option>
                                 <option value="7">Vilnius - 7 €</option>
                                 <option value="10">Kaunas - 10 €</option>
@@ -89,10 +89,12 @@
                         </form>
                         <div class="text-center">
                             @auth
-                                <form action="" method="POST">
-                                    @csrf
-                                    <a href="javascript:void(0)" class="text-success mt-3 d-block" style="font-weight: bold; font-size: 1.1rem;">Rezervuoti užsakymą</a>
-                                </form>
+                            <form action="{{ route('order.reserve') }}" method="POST">
+                                @csrf
+                                <input type="hidden" name="total_price" value="{{ $totalPrice + 7 }}">
+                                <input type="hidden" id="delivery-city" name="delivery_city" value="">
+                                <button type="submit" class="btn btn-success mt-3" id="reserve-order-btn" disabled>Rezervuoti užsakymą</button>
+                            </form>
                             @else
                                 <p class="mt-3" style="font-size: 1.1rem;">Jei norite rezervuoti prekę, prašome 
                                     <a href="{{ route('login') }}" class="text-success">prisijungti</a> 
@@ -103,7 +105,6 @@
                         </div>
                     </div>
                 </div>
-
             </div>
         @endif
     </div>
@@ -116,11 +117,25 @@
         @endif
 
         function updateShippingCost() {
-            const city = document.getElementById('delivery-city').value;
+            const citySelect = document.getElementById('delivery-city-select');
+            const city = citySelect.value;
             const shippingCost = parseInt(city);
+            
             document.getElementById('shipping-cost').textContent = shippingCost;
             document.getElementById('total-cost').textContent = totalPrice + shippingCost;
-        }
-    </script>
 
+            document.getElementById('delivery-city').value = city;
+        }
+
+        // Užtikrinti, kad mygtukas būtų neaktyvus, jei miestas nepasirinktas
+        document.getElementById('delivery-city-select').addEventListener('change', function() {
+            const city = this.value;
+            if (city) {
+                document.getElementById('delivery-city').value = city;
+                document.getElementById('reserve-order-btn').disabled = false;
+            } else {
+                document.getElementById('reserve-order-btn').disabled = true;
+            }
+        });
+    </script>
 @endsection
