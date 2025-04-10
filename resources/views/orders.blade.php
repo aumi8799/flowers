@@ -18,19 +18,29 @@
                 <h5 class="mb-0">Sveiki, {{ Auth::user()->name }}!</h5>
             </div>
             <div class="list-group">
-                <a href="/dashboard" class="list-group-item list-group-item-action">Skydelis</a>
-                <a href="/orders" class="list-group-item list-group-item-action active">Užsakymai</a>
-                <a href="#" class="list-group-item list-group-item-action">Atsisiuntimai</a>
-                <a href="/addresses" class="list-group-item list-group-item-action">Adresai</a>
-                <a href="{{ route('profile.show') }}" class="list-group-item list-group-item-action">Vartotojo informacija</a>
-                <a href="#" class="list-group-item list-group-item-action logout-link"
-                   onclick="event.preventDefault(); document.getElementById('logout-form').submit();">Atsijungti</a>
+                <a href="/dashboard" class="list-group-item list-group-item-action" style="border-radius: 0;">
+                    <i class="far fa-tachometer-alt"></i> Skydelis
+                </a>
+                <a href="/orders" class="list-group-item list-group-item-action active" style="border-radius: 0;">
+                    <i class="far fa-clipboard-list"></i> Užsakymai
+                </a>
+                <a href="#" class="list-group-item list-group-item-action" style="border-radius: 0;">
+                    <i class="fas fa-download"></i> Atsisiuntimai
+                </a>
+                <a href="#" class="list-group-item list-group-item-action" style="border-radius: 0;">
+                    <i class="far fa-map-marker-alt"></i> Adresai
+                </a>
+                <a href="{{ route('profile.show') }}" class="list-group-item list-group-item-action" style="border-radius: 0;">
+                    <i class="far fa-user"></i> Vartotojo informacija
+                </a>
+                <a href="#" class="list-group-item list-group-item-action logout-link" onclick="event.preventDefault(); document.getElementById('logout-form').submit();" style="border-radius: 0;">
+                    <i class="fas fa-sign-out-alt"></i> Atsijungti
+                    </a>
                 <form id="logout-form" method="POST" action="{{ route('logout') }}" style="display: none;">
-                    @csrf
+                     @csrf
                 </form>
             </div>
         </div>
-
         <div class="col-md-9">
         <h2>Mano užsakymai</h2>
 
@@ -49,7 +59,7 @@
     <div class="alert alert-info mb-0 text-center">
         Šiuo metu neturite užsakymų. 🌸
         <br>
-        Apsilankykite <a href="{{ url('/') }}">pagrindiniame puslapyje</a> ir išsirinkite gėlių!
+        Apsilankykite <a href="{{ route('catalog.index') }}">gėlių kataloge</a> ir išsirinkite gėlių!
     </div>
 @else
 <div class="list-group">

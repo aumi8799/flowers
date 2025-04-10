@@ -7,7 +7,9 @@
     <div class="container px-4 px-lg-5 my-5">
         <div class="text-center text-dark-gray">
             <h1 class="display-4 fw-bolder">Užsakymo #{{ $order->id }} detalės</h1>
-        </div>
+            <a href="{{ route('orders.index') }}" class="lead fw-normal text-dark-gray mb-0 text-decoration-none" style="cursor: pointer;">
+            <i class="fas fa-arrow-left"></i> Grįžti į mano užsakymus </a>
+            </div>
     </div>
 </header>
 
