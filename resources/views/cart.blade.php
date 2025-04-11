@@ -16,6 +16,8 @@
             <div class="alert alert-success">{{ session('success') }}</div>
         @endif
 
+        @php $totalPrice = 0; @endphp
+
         @if(empty($cart))
             <div class="text-center my-5">
                 <img src="{{ asset('images/cart-empty.png') }}" alt="Tuščias krepšelis" class="img-fluid" style="max-width: 150px;">
@@ -35,9 +37,7 @@
                             </tr>
                         </thead>
                         <tbody>
-                            @php
-                                $totalPrice = 0;
-                            @endphp
+                            @php $totalPrice = 0; @endphp
 
                             @foreach($cart as $id => $item)
                                 @php
@@ -78,64 +78,101 @@
                             </select>
                         </div>
                         <div>
-                            <strong>Pristatymo kaina: <span id="shipping-cost">7</span> €</strong>
+                            <strong>Pristatymo kaina: <span id="shipping-cost">0</span> €</strong>
                         </div>
                         <hr>
                         <div style="text-align: right;">
-                            <h4 style="font-weight: normal; font-size: 1rem;">Viso: <span id="total-cost">{{ $totalPrice + 7 }}</span> €</h4>
+                            <h4 style="font-weight: normal; font-size: 1rem;">Viso: <span id="total-cost">{{ $totalPrice }}</span> €</h4>
                         </div>
-                        <form action="" method="GET">
-                            <button type="submit" class="add-to-cart-btn w-100 mt-4">Tęsti atsiskaitymą</button>
-                        </form>
+
+                        <!-- Checkout button -->
+                        <a href="{{ route('checkout.show', ['total' => $totalPrice + 7]) }}"
+                            class="btn btn-dark w-100 mt-4"
+                            onclick="return validateCheckout()"
+                            id="checkout-button"
+                            style="pointer-events: none; opacity: 0.5;">
+                            Tęsti atsiskaitymą
+                        </a>
+
+
+                        <!-- Order reservation (prisijungusiems) -->
                         <div class="text-center">
-                            @auth
+                        @auth
                             <form action="{{ route('order.reserve') }}" method="POST">
                                 @csrf
-                                <input type="hidden" name="total_price" value="{{ $totalPrice + 7 }}">
+                                <input type="hidden" name="total_price" id="hidden-total-price" value="{{ $totalPrice }}">
                                 <input type="hidden" id="delivery-city" name="delivery_city" value="">
-                                <button type="submit" class="btn btn-success mt-3" id="reserve-order-btn" disabled>Rezervuoti užsakymą</button>
+                                <button type="submit" class="btn btn-success mt-3" id="reserve-order-btn" disabled>
+                                    Rezervuoti užsakymą
+                                </button>
                             </form>
                             @else
-                                <p class="mt-3" style="font-size: 1.1rem;">Jei norite rezervuoti prekę, prašome 
+                                <p class="mt-3" style="font-size: 1.1rem;">Jei norite rezervuoti ar nusipirkti prekę, prašome 
                                     <a href="{{ route('login') }}" class="text-success">prisijungti</a> 
                                     arba 
                                     <a href="{{ route('register') }}" class="text-success">užsiregistruoti</a>.
                                 </p>
                             @endauth
+
                         </div>
                     </div>
                 </div>
             </div>
+
+
+            <script>
+            let totalPrice = @json($totalPrice);
+
+                function updateShippingCost() {
+                    const citySelect = document.getElementById('delivery-city-select');
+                    const city = citySelect.value;
+                    const shippingCost = parseInt(city);
+                    const updatedTotal = totalPrice + shippingCost;
+
+                    // Atnaujinam tekstus
+                    document.getElementById('shipping-cost').textContent = shippingCost;
+                    document.getElementById('total-cost').textContent = updatedTotal;
+                    document.getElementById('hidden-total-price').value = updatedTotal;
+                    document.getElementById('delivery-city').value = city;
+
+                    // Aktyvuojam mygtuką
+                    const checkoutButton = document.getElementById('checkout-button');
+                    checkoutButton.href = `/checkout?total=${updatedTotal}&city=${city}`;
+                    checkoutButton.style.pointerEvents = 'auto';
+                    checkoutButton.style.opacity = '1';
+
+                    // ❗ ŠITA EILUTĖ BUVO PRADINGUS
+                    const reserveBtn = document.getElementById('reserve-order-btn');
+                    if (reserveBtn) {
+                        reserveBtn.disabled = false;
+                    }
+                }
+
+
+
+                function validateCheckout() {
+                    const city = document.getElementById('delivery-city-select').value;
+                    if (!city) {
+                        alert('Pasirinkite miestą prieš tęsdami atsiskaitymą.');
+                        return false;
+                    }
+                    return true;
+                }
+            </script>
+
+
         @endif
     </div>
 
     <script>
-        @if(isset($totalPrice))
-            var totalPrice = @json($totalPrice);
-        @else
-            var totalPrice = 0;
-        @endif
-
-        function updateShippingCost() {
+        // Paleidžiam automatiškai jei miestas jau pasirinktas
+        window.addEventListener('DOMContentLoaded', function () {
             const citySelect = document.getElementById('delivery-city-select');
-            const city = citySelect.value;
-            const shippingCost = parseInt(city);
-            
-            document.getElementById('shipping-cost').textContent = shippingCost;
-            document.getElementById('total-cost').textContent = totalPrice + shippingCost;
-
-            document.getElementById('delivery-city').value = city;
-        }
-
-        // Užtikrinti, kad mygtukas būtų neaktyvus, jei miestas nepasirinktas
-        document.getElementById('delivery-city-select').addEventListener('change', function() {
-            const city = this.value;
-            if (city) {
-                document.getElementById('delivery-city').value = city;
-                document.getElementById('reserve-order-btn').disabled = false;
-            } else {
-                document.getElementById('reserve-order-btn').disabled = true;
+            if (citySelect.value) {
+                updateShippingCost(); // paleidžia funkciją ir aktyvuoja mygtuką
             }
         });
     </script>
+
+
 @endsection

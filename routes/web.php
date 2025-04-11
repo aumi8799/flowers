@@ -86,3 +86,19 @@ use App\Http\Controllers\ProductController;
 Route::get('/product/{id}', [ProductController::class, 'show'])->name('product.show');
 
 
+use App\Http\Controllers\CheckoutController;
+
+Route::get('/checkout', [CheckoutController::class, 'show'])->name('checkout.show');
+//Route::get('/checkout/success', [CheckoutController::class, 'success'])->name('checkout.success');
+Route::get('/checkout/success', [CheckoutController::class, 'success'])->name('paypal.success');
+//Route::get('/checkout/cancel', [CheckoutController::class, 'cancel'])->name('paypal.cancel');
+
+
+use App\Http\Controllers\PayPalController;
+
+Route::get('/paypal/success', [PayPalController::class, 'success'])->name('paypal.success');
+Route::get('/paypal/cancel', [PayPalController::class, 'cancel'])->name('paypal.cancel');
+
+
+Route::post('/paypal/set-delivery-city', [PayPalController::class, 'setDeliveryCity'])->name('paypal.setDeliveryCity');
+
