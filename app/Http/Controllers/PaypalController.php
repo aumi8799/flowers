@@ -6,6 +6,8 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use App\Models\Order;
 use App\Models\OrderItem;
+use App\Mail\OrderPaidConfirmationMail;
+use Illuminate\Support\Facades\Mail;
 
 class PayPalController extends Controller
 {
@@ -25,7 +27,7 @@ class PayPalController extends Controller
         $order = new Order();
         $order->user_id = Auth::id();
         $order->status = 'apmokėtas';
-        $order->delivery_city = session('delivery_city', 'Nežinomas miestas'); // <-- nauja eilutė!
+        $order->delivery_city = session('delivery_city', 'Nežinomas miestas'); 
         $order->total_price = collect($cart)->sum(function ($item) {
             return $item['price'] * $item['quantity'];
         });
@@ -41,6 +43,12 @@ class PayPalController extends Controller
                 'price' => $item['price'],
             ]);
         }
+
+        // Įkeliam user į order, kad nevežtų klaidos blade šablone
+        $order->load('user');
+
+        // Išsiunčiam patvirtinimo laišką
+        Mail::to(Auth::user()->email)->send(new OrderPaidConfirmationMail($order));
 
         // Išvalom krepšelį
         session()->forget('cart');
