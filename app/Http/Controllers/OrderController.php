@@ -8,34 +8,68 @@ use App\Models\Order;
 class OrderController extends Controller
 {
     public function reserve(Request $request)
-    {
-        // Sukuriame naują užsakymą
-        $order = new Order();
-        $order->user_id = auth()->id(); 
-        $order->delivery_city = $request->delivery_city;
-        $order->total_price = $request->total_price;
-        $order->status = 'rezervuotas'; 
-        $order->save();
-    
-        // Įrašome prekes į order_items lentelę
-        $cart = session()->get('cart', []);
-        foreach ($cart as $productId => $item) {
-            \App\Models\OrderItem::create([
-                'order_id' => $order->id,
-                'product_id' => $productId,
-                'quantity' => $item['quantity'],
-                'price' => $item['price']
-            ]);
-        }
-    
-        // Išvalome krepšelį
-        session()->forget('cart');
-    
-        // Grąžiname į užsakymų puslapį su pranešimu
-        return redirect()->route('orders.index')->with('success', 'Užsakymas rezervuotas!');
-    }
-    
+{
+    $order = new Order();
+    $order->user_id = auth()->id(); 
+    $order->delivery_city = $request->delivery_city;
+    $order->delivery_address = $request->delivery_address;
+    $order->postal_code = $request->postal_code;
+    $order->first_name = $request->first_name;
+    $order->last_name = $request->last_name;
+    $order->phone = $request->phone;
+    $order->email = $request->email;
+    $order->notes = $request->notes;
+    $order->total_price = $request->total_price;
+    $order->status = 'rezervuotas'; 
+    $order->save();
 
+    $cart = session()->get('cart', []);
+    foreach ($cart as $productId => $item) {
+        \App\Models\OrderItem::create([
+            'order_id' => $order->id,
+            'product_id' => $productId,
+            'quantity' => $item['quantity'],
+            'price' => $item['price']
+        ]);
+    }
+
+    session()->forget('cart');
+
+    return redirect()->route('orders.index')->with('success', 'Užsakymas rezervuotas!');
+}
+
+    
+    public function processOrder(Request $request)
+    {
+        // Patikrinkite, ar visi reikalingi laukai užpildyti
+        $request->validate([
+            'first_name' => 'required|string',
+            'last_name' => 'required|string',
+            'phone' => 'required|string',
+            'email' => 'required|email',
+            'delivery_address' => 'required|string',
+            'city' => 'required|string',
+            'postal_code' => 'required|string',
+        ]);
+
+        // Sukurkite naują užsakymą arba apdorokite pagal poreikį
+        $order = Order::create([
+            'user_id' => auth()->id(), // Jei vartotojas prisijungęs
+            'first_name' => $request->first_name,
+            'last_name' => $request->last_name,
+            'phone' => $request->phone,
+            'email' => $request->email,
+            'delivery_address' => $request->delivery_address,
+            'city' => $request->city,
+            'postal_code' => $request->postal_code,
+            'notes' => $request->notes,
+            'total_price' => $request->total, // Priklausomai nuo to, kaip perduodate šią informaciją
+            'status' => 'rezervuotas', // Pradinė būsena
+        ]);
+
+        // Peradresavimas į PayPal apmokėjimo puslapį
+        return redirect()->route('paypal.payment', ['order_id' => $order->id, 'total' => $order->total_price]);
+    }
     // Rodome užsakymus vartotojui
     public function myOrders(Request $request)
     {
@@ -115,16 +149,70 @@ class OrderController extends Controller
             if (isset($request->quantities[$item->id])) {
                 $item->quantity = $request->quantities[$item->id];
                 $item->save();
-
+    
                 $total += $item->quantity * $item->price;
             }
         }
-
+    
+        // Pridėti pristatymo kainą prie bendros sumos
+        $deliveryCost = (int) $request->delivery_city; // 7 arba 10
+        $total += $deliveryCost;
+    
         $order->total_price = $total;
         $order->save();
-
+    
         return redirect()->route('orders.show', $order->id)->with('success', 'Užsakymas atnaujintas sėkmingai!');
     }
+    public function courierTasks(Request $request)
+    {
+        // Sukuriame užklausą, kuri grąžina visus užsakymus pagal sukūrimo datą
+        $query = Order::orderByDesc('created_at');
+    
+        // Jei statusas pasirinktas (ir nėra tuščias)
+        if ($request->filled('status')) {
+            // Filtruojame pagal pasirinktą statusą
+            $query->where('status', $request->status);
+        } else {
+            // Jei statusas tuščias (tai reiškia, kad pasirinkta "Visos užduotys")
+            $query->whereIn('status', ['apmokėtas', 'pristatytas']);
+        }
+    
+        // Gauti užsakymus pagal filtrus
+        $orders = $query->get();
+    
+        // Grąžinti užsakymus į peržiūros šabloną
+        return view('courier.tasks', compact('orders'));
+    }
+    
+
+        public function markAsDelivered($orderId)
+        {
+            $order = \App\Models\Order::findOrFail($orderId);
+
+            // (Nebūtina) gali pridėti papildomą tikrinimą, ar tai kurjerio paskyra
+
+            if ($order->status !== 'apmokėtas') {
+                return redirect()->back()->with('error', 'Tik apmokėtus užsakymus galima pažymėti kaip pristatytus.');
+            }
+
+            $order->status = 'pristatytas';
+            $order->save();
+
+            return redirect('/courier/tasks')->with('success', 'Užsakymas pažymėtas kaip pristatytas.');
+
+        }
+
+
+        public function courierShow($id)
+        {
+            $order = Order::with(['user', 'items.product'])->findOrFail($id);
+
+            if (!in_array($order->status, ['apmokėtas', 'pristatytas'])) {
+                abort(403, 'Šio užsakymo peržiūrėti negalima.');
+            }
+
+            return view('courier.show', compact('order'));
+        }
 
 
 }

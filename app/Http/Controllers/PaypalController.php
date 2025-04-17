@@ -14,7 +14,27 @@ class PayPalController extends Controller
     public function success(Request $request)
     {
         $cart = session('cart', []);
+        $orderId = $request->query('order_id');
 
+        if ($orderId) {
+            $order = Order::where('id', $orderId)
+                        ->where('user_id', Auth::id())
+                        ->where('status', 'rezervuotas')
+                        ->first();
+    
+            if (!$order) {
+                return redirect('/')->with('error', 'Užsakymas nerastas arba negalima jo apmokėti.');
+            }
+    
+            $order->status = 'apmokėtas';
+            $order->save();
+    
+            // Patvirtinimo laiškas
+            Mail::to(Auth::user()->email)->send(new OrderPaidConfirmationMail($order));
+    
+            return view('checkout_success');
+        }
+    
         if (empty($cart)) {
             return redirect('/')->with('error', 'Krepšelis tuščias.');
         }
@@ -28,9 +48,7 @@ class PayPalController extends Controller
         $order->user_id = Auth::id();
         $order->status = 'apmokėtas';
         $order->delivery_city = session('delivery_city', 'Nežinomas miestas'); 
-        $order->total_price = collect($cart)->sum(function ($item) {
-            return $item['price'] * $item['quantity'];
-        });
+        $order->total_price = session('total_price', 0);
         $order->save();
         
 

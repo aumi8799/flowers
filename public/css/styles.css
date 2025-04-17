@@ -11171,3 +11171,51 @@ textarea.form-control-lg {
 }
 }
 
+.card-glass {
+  background: rgba(255, 255, 255, 0.75);
+  backdrop-filter: blur(8px);
+  border-radius: 1rem;
+  box-shadow: 0 8px 16px rgba(0, 0, 0, 0.1);
+  transition: transform 0.3s ease, box-shadow 0.3s ease;
+  overflow: hidden;
+  position: relative;
+}
+
+.card-glass:hover {
+  transform: translateY(-5px);
+  box-shadow: 0 12px 24px rgba(0, 0, 0, 0.15);
+}
+
+.ribbon {
+  position: absolute;
+  top: 0;
+  right: 0;
+  padding: 6px 15px;
+  color: white;
+  font-size: 0.85rem;
+  font-weight: 600;
+  border-bottom-left-radius: 12px;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.ribbon.rezervuotas {
+  background: linear-gradient(45deg, #ff9800, #ffc107);
+}
+
+.ribbon.apmokėtas {
+  background: linear-gradient(45deg, #2196f3, #64b5f6);
+}
+
+.ribbon.pristatytas {
+  background: linear-gradient(45deg, #4caf50, #81c784);
+}
+
+.ribbon.atšauktas {
+  background: linear-gradient(45deg, #f44336, #e57373);
+}
+.card:hover {
+  transform: translateY(-10px);
+  transition: transform 0.3s ease-in-out;
+}

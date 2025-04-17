@@ -41,55 +41,91 @@
                 </form>
             </div>
         </div>
+
         <div class="col-md-9">
         <h2>Mano užsakymai</h2>
 
-<form method="GET" action="{{ route('orders.index') }}" class="mb-4">
-    <label for="status">Filtruoti pagal būseną:</label>
-    <select name="status" id="status" onchange="this.form.submit()" class="form-select w-auto d-inline-block">
-        <option value="">Visi</option>
-        <option value="rezervuotas" {{ request('status') == 'rezervuotas' ? 'selected' : '' }}>Rezervuotas</option>
-        <option value="apmokėtas" {{ request('status') == 'apmokėtas' ? 'selected' : '' }}>Apmokėtas</option>
-        <option value="pristatytas" {{ request('status') == 'pristatytas' ? 'selected' : '' }}>Pristatytas</option>
-        <option value="atšauktas" {{ request('status') == 'atšauktas' ? 'selected' : '' }}>Atšauktas</option>
-    </select>
-</form>
+                    <form method="GET" action="{{ route('orders.index') }}" class="mb-4">
+                        <label for="status">Filtruoti pagal būseną:</label>
+                        <select name="status" id="status" onchange="this.form.submit()" class="form-select w-auto d-inline-block">
+                            <option value="">Visi</option>
+                            <option value="rezervuotas" {{ request('status') == 'rezervuotas' ? 'selected' : '' }}>Rezervuotas</option>
+                            <option value="apmokėtas" {{ request('status') == 'apmokėtas' ? 'selected' : '' }}>Apmokėtas</option>
+                            <option value="pristatytas" {{ request('status') == 'pristatytas' ? 'selected' : '' }}>Pristatytas</option>
+                            <option value="atšauktas" {{ request('status') == 'atšauktas' ? 'selected' : '' }}>Atšauktas</option>
+                        </select>
+                    </form>
 
-@if($orders->isEmpty())
-    <div class="alert alert-info mb-0 text-center">
-        Šiuo metu neturite užsakymų. 🌸
-        <br>
-        Apsilankykite <a href="{{ route('catalog.index') }}">gėlių kataloge</a> ir išsirinkite gėlių!
-    </div>
-@else
-<div class="list-group">
-    @foreach($orders as $order)
-        <div class="list-group-item d-flex justify-content-between align-items-center">
-            <div>
-                <h5>Užsakymo ID: <a href="{{ route('orders.show', $order->id) }}" class="text-success" >#{{ $order->id }}</a></h5>
-                <p>Pristatymo miestas: 
-                    @if($order->delivery_city == 7)
-                        Vilnius
-                    @elseif($order->delivery_city == 10)
-                        Kaunas
+                    @if($orders->isEmpty())
+                        <div class="alert alert-info mb-0 text-center">
+                            Šiuo metu neturite užsakymų. 🌸
+                            <br>
+                            Apsilankykite <a href="{{ route('catalog.index') }}">gėlių kataloge</a> ir išsirinkite gėlių!
+                        </div>
                     @else
-                        Nenurodytas miestas
+                    <div class="row">
+                    @foreach($orders as $order)
+                    <div class="col-md-12 mb-4">
+                                <div class="card-glass p-4">
+                                    <!-- Ribbon -->
+                                    <div class="ribbon {{ $order->status }}">
+                                        @switch($order->status)
+                                            @case('rezervuotas')
+                                                <i class="fas fa-clock"></i>
+                                                @break
+                                            @case('apmokėtas')
+                                                <i class="fas fa-euro-sign"></i>
+                                                @break
+                                            @case('pristatytas')
+                                                <i class="fas fa-truck"></i>
+                                                @break
+                                            @case('atšauktas')
+                                                <i class="fas fa-times-circle"></i>
+                                                @break
+                                            @default
+                                                <i class="fas fa-info-circle"></i>
+                                        @endswitch
+                                        {{ ucfirst($order->status) }}
+                                    </div>
+                                
+                                    <h5>
+                                        Užsakymo ID: 
+                                        <a href="{{ route('orders.show', $order->id) }}" class="text-success">#{{ $order->id }}</a>
+                                    </h5>
+
+                                    <p class="mb-1">
+                                        <strong>Pristatymo miestas:</strong>
+                                        @if($order->delivery_city == 7)
+                                            Vilnius
+                                        @elseif($order->delivery_city == 10)
+                                            Kaunas
+                                        @else
+                                            Nenurodytas miestas
+                                        @endif
+                                    </p>
+
+                                    @if($order->status === 'rezervuotas')
+                                        <p class="mb-1"><strong>Rezervacijos laikas:</strong> {{ $order->created_at->format('Y-m-d H:i:s') }}</p>
+                                    @endif
+
+                                    @if ($order->cancel_reason)
+                                        <p class="mb-1"><strong>Priežastis:</strong> {{ $order->cancel_reason }}</p>
+                                    @endif
+
+                                    <p class="mb-2"><strong>Kaina:</strong> {{ $order->total_price }} €</p>
+
+                                    <a href="{{ route('orders.show', $order->id) }}" class="btn btn-outline-success btn-sm">Peržiūrėti detales</a>
+                                    @if($order->status === 'pristatytas' && !$order->review)
+                                <a href="{{ route('reviews.create', $order->id) }}" class="btn btn-sm btn-outline-primary mt-2">Rašyti atsiliepimą</a>
+                            @endif
+                                </div>
+                            </div>
+
+                    @endforeach
+                    </div>
+
+                        </div>
                     @endif
-                </p>
-                <p>Būsena: {{ $order->status }}</p>
-                <p>Kaina: {{ $order->total_price }} €</p>
-                <p>Rezervacijos laikas: {{ $order->created_at->format('Y-m-d H:i:s') }}</p>
-                <a href="{{ route('orders.show', $order->id) }}" class="text-success">Peržiūrėti detales</a>
-
-
-            </div>
-        </div>
-    @endforeach
-</div>
-
-
-    </div>
-@endif
 
         </div>
     </div>

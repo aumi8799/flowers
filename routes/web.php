@@ -12,7 +12,15 @@ Route::middleware([
     'verified',
 ])->group(function () {
     Route::get('/dashboard', function () {
-        return view('dashboard');
+
+        if (Auth::user()->role === 'admin') {
+            return redirect('/admin');  
+        }
+        if (Auth::user()->role === 'courier') {
+            return redirect('/courier');  
+        }
+
+        return view('dashboard'); 
     })->name('dashboard');
 });
 
@@ -70,6 +78,7 @@ Route::delete('/orders/{order}', [OrderController::class, 'destroy'])->name('ord
 Route::get('/orders/{order}/edit', [OrderController::class, 'edit'])->name('orders.edit');
 Route::put('/orders/{order}', [OrderController::class, 'update'])->name('orders.update');
 
+Route::post('/order/process', [OrderController::class, 'processOrder'])->name('order.process');
 
 // Užsakymų rodymas
 Route::get('/orders', [OrderController::class, 'myOrders'])->name('orders.index');
@@ -90,7 +99,7 @@ use App\Http\Controllers\CheckoutController;
 
 Route::get('/checkout', [CheckoutController::class, 'show'])->name('checkout.show');
 //Route::get('/checkout/success', [CheckoutController::class, 'success'])->name('checkout.success');
-Route::get('/checkout/success', [CheckoutController::class, 'success'])->name('paypal.success');
+Route::get('/checkout/success', [CheckoutController::class, 'success'])->name('checkout.success');
 //Route::get('/checkout/cancel', [CheckoutController::class, 'cancel'])->name('paypal.cancel');
 
 
@@ -101,4 +110,33 @@ Route::get('/paypal/cancel', [PayPalController::class, 'cancel'])->name('paypal.
 
 
 Route::post('/paypal/set-delivery-city', [PayPalController::class, 'setDeliveryCity'])->name('paypal.setDeliveryCity');
+use App\Http\Controllers\ReviewController;
 
+Route::middleware(['auth'])->group(function () {
+    Route::get('/orders/{order}/review', [ReviewController::class, 'create'])->name('reviews.create');
+    Route::post('/orders/{order}/review', [ReviewController::class, 'store'])->name('reviews.store');
+});
+
+Route::get('/reviews', [ReviewController::class, 'showAll'])->name('reviews.show');
+
+use App\Http\Controllers\AdminController;
+use App\Http\Controllers\CourierController;
+
+Route::middleware(['auth', 'role:admin'])->group(function () {
+    Route::get('/admin', [AdminController::class, 'index'])->name('admin.dashboard');
+});
+
+Route::middleware(['auth', 'role:courier'])->group(function () {
+    Route::get('/courier', [CourierController::class, 'index'])->name('courier.dashboard');
+});
+Route::get('/admin', [AdminController::class, 'index'])->name('admin.dashboard');
+Route::get('/courier', [CourierController::class, 'index'])->name('courier.dashboard');
+
+Route::middleware(['auth', 'role:courier'])->group(function () {
+    Route::get('/courier/tasks', [OrderController::class, 'courierTasks'])->name('courier.tasks');
+    Route::get('/courier/tasks/{id}', [OrderController::class, 'courierShow'])->name('courier.show');
+    Route::put('/courier/tasks/{order}/delivered', [OrderController::class, 'markAsDelivered'])->name('order.delivered');
+});
+Route::get('/courier/tasks', [OrderController::class, 'courierTasks'])->name('courier.tasks');
+Route::get('/courier/tasks/{id}', [OrderController::class, 'courierShow'])->name('courier.show');
+Route::put('/courier/tasks/{order}/delivered', [OrderController::class, 'markAsDelivered'])->name('order.delivered');

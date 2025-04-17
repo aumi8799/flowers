@@ -8,10 +8,24 @@ class CheckoutController extends Controller
 {
     public function show(Request $request)
     {
-        $total = $request->input('total') ?? 0;
-        return view('checkout', compact('total'));
+        $total = $request->query('total'); 
+        $city = $request->query('city');
+        $orderId = $request->query('order_id');
+    
+        if (!$orderId) {
+            session([
+                'total_price' => $total,
+                'delivery_city' => $city
+            ]);
+        }
+    
+        return view('checkout', [
+            'total' => $total,
+            'city' => $city,
+            'order_id' => $orderId ?? null
+        ]);
     }
-
+    
     public function success()
     {
         return view('checkout_success');

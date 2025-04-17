@@ -11,7 +11,17 @@ class Order extends Model
     use HasFactory;
 
     protected $fillable = [
-        'user_id', 'delivery_city', 'total_price', 'status'
+        'user_id', 
+        'delivery_city', 
+        'total_price', 
+        'status',
+        'first_name',      // Pridėtas vardas
+        'last_name',       // Pridėtas pavardė
+        'phone',           // Pridėtas telefono numeris
+        'email',           // Pridėtas el. paštas
+        'delivery_address', // Pridėtas pristatymo adresas
+        'postal_code',     // Pridėtas pašto kodas
+        'notes',           // Pridėtos pastabos
     ];
 
     // Ryšys su užsakymo prekėmis
@@ -23,5 +33,10 @@ class Order extends Model
     public function user()
     {
         return $this->belongsTo(User::class);
+    }
+
+    public function review()
+    {
+        return $this->hasOne(Review::class);
     }
 }
