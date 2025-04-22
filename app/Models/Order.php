@@ -22,6 +22,7 @@ class Order extends Model
         'delivery_address', // Pridėtas pristatymo adresas
         'postal_code',     // Pridėtas pašto kodas
         'notes',           // Pridėtos pastabos
+        'video',
     ];
 
     // Ryšys su užsakymo prekėmis

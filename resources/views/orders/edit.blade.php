@@ -62,18 +62,46 @@
                             <strong>{{ $order->created_at->format('Y-m-d H:i:s') }}</strong>
                         </div>
                         <hr>
-                    <h5>Pristatymo išlaidos:</h5>
+                    <h5 style="font-weight: normal; font-size: 1rem;">Pirkėjo informacija:</h5>
+                    <div class="mb-3">
+                        <label for="first_name" class="form-label">Vardas</label>
+                        <input type="text" name="first_name" id="first_name" value="{{ $order->first_name }}" class="form-control">
+
+                        <label for="last_name" class="form-label mt-2">Pavardė</label>
+                        <input type="text" name="last_name" id="last_name" value="{{ $order->last_name }}" class="form-control">
+
+                        <label for="phone" class="form-label mt-2">Telefono numeris</label>
+                        <input type="text" name="phone" id="phone" value="{{ $order->phone }}" class="form-control">
+
+                        <label for="email" class="form-label mt-2">El. paštas</label>
+                        <input type="email" name="email" id="email" value="{{ $order->email }}" class="form-control">
+                    </div>
+                    <hr>
+                    <h5 style="font-weight: normal; font-size: 1rem;">Papildoma informacija:</h5>
+                    <div class="mb-3">
+                    <label for="notes" class="form-label mt-2">Pastabos</label>
+                    <textarea name="notes" id="notes" class="form-control">{{ $order->notes }}</textarea>
+                    </div>
+                    <hr>
+                    <h5 style="font-weight: normal; font-size: 1rem;">Pristatymo adresas:</h5>
                     <div class="mb-3">
                         <select class="form-select" id="delivery-city-select" name="delivery_city" onchange="updateShippingCost()">
                             <option value="" disabled selected>Pasirinkite miestą</option>
                             <option value="7" {{ $order->delivery_city == 'Vilnius' ? 'selected' : '' }}>Vilnius - 7 €</option>
                             <option value="10" {{ $order->delivery_city == 'Kaunas' ? 'selected' : '' }}>Kaunas - 10 €</option>
                         </select>
-                    </div>
-                    <div>
+                        <label for="delivery_address" class="form-label">Adresas</label>
+                        <input type="text" name="delivery_address" id="delivery_address" value="{{ $order->delivery_address }}" class="form-control">
+
+                        <label for="postal_code" class="form-label mt-2">Pašto kodas</label>
+                        <input type="text" name="postal_code" id="postal_code" value="{{ $order->postal_code }}" class="form-control">
+
+                        <div>
                         <strong>Pristatymo kaina: <span id="shipping-cost">0</span> €</strong>
                     </div>
-                    <hr>
+
+                    </div>
+
                     <div style="text-align: right;">
                             <h5 style="font-weight: normal; font-size: 1rem;">Bendra suma: <span id="totalPrice"> </span></h5>
                      </div>

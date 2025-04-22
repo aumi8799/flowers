@@ -47,8 +47,15 @@ class PayPalController extends Controller
         $order = new Order();
         $order->user_id = Auth::id();
         $order->status = 'apmokėtas';
-        $order->delivery_city = session('delivery_city', 'Nežinomas miestas'); 
-        $order->total_price = session('total_price', 0);
+        $order->first_name = session('first_name');
+        $order->last_name = session('last_name');
+        $order->phone = session('phone');
+        $order->email = session('email');
+        $order->delivery_address = session('delivery_address');
+        $order->postal_code = session('postal_code');
+        $order->delivery_city = session('delivery_city');
+        $order->notes = session('notes');
+        $order->total_price = session('total_price');
         $order->save();
         
 
@@ -69,7 +76,7 @@ class PayPalController extends Controller
         Mail::to(Auth::user()->email)->send(new OrderPaidConfirmationMail($order));
 
         // Išvalom krepšelį
-        session()->forget('cart');
+        session()->forget(['cart', 'first_name', 'last_name', 'phone', 'email', 'delivery_address', 'postal_code', 'delivery_city', 'notes', 'total_price']);
 
         return view('checkout_success');
     }

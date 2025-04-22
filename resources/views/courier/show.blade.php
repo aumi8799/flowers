@@ -17,7 +17,12 @@
     <div class="card mb-4">
         <div class="card-body">
             <p><strong>Užsakymo ID:</strong> {{ $order->id }}</p>
-            <p><strong>Užsakovo vardas:</strong> {{ $order->user->name }}</p>
+            <p><strong>Užsakovo duomenys:</strong> 
+            <p><strong>Vardas:</strong> {{ $order->first_name }} </p>  
+            <p><strong>Pavardė</strong> {{ $order->last_name }} </p>  
+            <p><strong>Telefono numeris:</strong> {{ $order->phone }} </p>  
+            <p><strong>El. paštas:</strong> {{ $order->email }} </p>  
+            <p><strong>Pristatymo informacija:</strong>  
             <p><strong>Pristatymo miestas:</strong>          
                              @if($order->delivery_city == 7)
                                 Vilnius
@@ -27,6 +32,9 @@
                                 Nenurodytas miestas
                             @endif
                         </p>
+            <p><strong>Pristatymo adresas:</strong> {{ $order->delivery_address}} </p>  
+            <p><strong>Pašto kodas:</strong> {{ $order->postal_code }} </p>  
+            <p><strong>Pastabos:</strong> {{ $order->notes }} </p>             
             <p><strong>Bendra suma:</strong> {{ $order->total_price }}€</p>
             <p><strong>Statusas:</strong> {{ $order->status }}</p>
         </div>

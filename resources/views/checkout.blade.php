@@ -9,9 +9,6 @@
             <h1 class="display-4 fw-bolder">
                 <i class="fab fa-paypal"></i> Apmokėjimas per PayPal
             </h1>
-            @if(isset($order_id))
-            <p class="lead fw-normal text-dark-gray mb-0">Jūs mokate už rezervuotą užsakymą #{{ $order_id }}</p>
-            @endif
             <p class="lead fw-normal text-dark-gray mb-0">Mokėjimo suma: <strong>{{ $total }} €</strong></p>
             </div>
         </div>

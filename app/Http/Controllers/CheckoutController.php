@@ -11,11 +11,18 @@ class CheckoutController extends Controller
         $total = $request->query('total'); 
         $city = $request->query('city');
         $orderId = $request->query('order_id');
-    
+
         if (!$orderId) {
             session([
-                'total_price' => $total,
-                'delivery_city' => $city
+                'first_name' => $request->first_name,
+                'last_name' => $request->last_name,
+                'phone' => $request->phone,
+                'email' => $request->email,
+                'delivery_address' => $request->delivery_address,
+                'postal_code' => $request->postal_code,
+                'delivery_city' => $request->city,
+                'notes' => $request->notes,
+                'total_price' => $request->total,
             ]);
         }
     

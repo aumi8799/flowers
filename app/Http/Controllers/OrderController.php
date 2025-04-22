@@ -129,21 +129,39 @@ class OrderController extends Controller
         if ($order->user_id !== auth()->id()) {
             abort(403, 'Negalite redaguoti šio užsakymo.');
         }
-
+    
         if ($order->status !== 'rezervuotas') {
             return redirect()->route('orders.show', $order->id)->with('error', 'Tik rezervuotus užsakymus galima redaguoti.');
         }
-
+    
         $request->validate([
             'delivery_city' => 'required|integer',
             'quantities' => 'required|array',
+    
+            // Nauji validacijos laukeliai
+            'first_name' => 'nullable|string|max:255',
+            'last_name' => 'nullable|string|max:255',
+            'phone' => 'nullable|string|max:30',
+            'email' => 'nullable|email|max:255',
+            'delivery_address' => 'nullable|string|max:255',
+            'postal_code' => 'nullable|string|max:20',
+            'notes' => 'nullable|string|max:1000',
         ]);
-
+    
         // Atnaujinti pristatymo miestą
         $order->delivery_city = $request->delivery_city;
-
+    
+        // Nauji atnaujinami laukeliai
+        $order->first_name = $request->first_name;
+        $order->last_name = $request->last_name;
+        $order->phone = $request->phone;
+        $order->email = $request->email;
+        $order->delivery_address = $request->delivery_address;
+        $order->postal_code = $request->postal_code;
+        $order->notes = $request->notes;
+    
         $total = 0;
-
+    
         // Atnaujinti prekių kiekius ir perskaičiuoti bendrą sumą
         foreach ($order->items as $item) {
             if (isset($request->quantities[$item->id])) {
@@ -163,6 +181,7 @@ class OrderController extends Controller
     
         return redirect()->route('orders.show', $order->id)->with('success', 'Užsakymas atnaujintas sėkmingai!');
     }
+    
     public function courierTasks(Request $request)
     {
         // Sukuriame užklausą, kuri grąžina visus užsakymus pagal sukūrimo datą

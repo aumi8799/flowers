@@ -59,72 +59,87 @@
                 </div>
 
                 <div class="col-md-4">
-                    <div class="border p-3 rounded">
-                        <h2>Užsakymo ID: #{{ $order->id }}</h2>
-                        <hr>
-                        <h5 style="font-weight: normal; font-size: 1rem;">Būsena:</h5>
-                        <div class="mb-3">
-                            <strong>{{ $order->status }}</strong>
-                        </div>
-                        @if ($order->cancel_reason)
-                            <hr>
-                            <h5 style="font-weight: normal; font-size: 1rem;">Priežastis:</h5>
-                            <div class="mb-3">
-                                <strong>{{ $order->cancel_reason }}</strong>
-                            </div>
-                        @endif
-                        <hr>
-                        @if($order->status === 'rezervuotas')
-                        <h5 style="font-weight: normal; font-size: 1rem;">Rezervacijos laikas:</h5>
-                        <div class="mb-3">
-                            <strong>{{ $order->created_at->format('Y-m-d H:i:s') }}</strong>
-                        </div>
-                        <hr>
-                        @endif
-                        <h5 style="font-weight: normal; font-size: 1rem;">Pristatymo miestas:</h5>
-                        <div class="mb-3">
-                            <strong>  
-                                @if($order->delivery_city == 7)
-                                    Vilnius
-                                @elseif($order->delivery_city == 10)
-                                    Kaunas
-                                @else
-                                    Nenurodytas miestas
-                                @endif
-                            </strong>
-                        </div>
-                        <hr>
-                        <div style="text-align: right;">
-                            <h5 style="font-weight: normal; font-size: 1rem;">Pristatymo išlaidos: {{ $order->delivery_city }} €</h5>
-                            <h5 style="font-weight: normal; font-size: 1rem;">Bendra suma: <span id="total-cost">{{ $order->total_price }}</span> €</h5>
-                        </div>
-                        <div class="d-flex justify-content-end gap-2 mt-4">
-                            @if($order->status === 'rezervuotas')
-                                <div class="d-flex justify-content-end gap-2 mt-4">
+    <div class="border p-3 rounded">
+        <h2>Užsakymo ID: #{{ $order->id }}</h2>
+        <hr>
+        <h5 style="font-weight: normal; font-size: 1rem;">Būsena:</h5>
+        <div class="mb-3">
+            <strong>{{ $order->status }}</strong>
+        </div>
+        @if ($order->cancel_reason)
+            <hr>
+            <h5 style="font-weight: normal; font-size: 1rem;">Priežastis:</h5>
+            <div class="mb-3">
+                <strong>{{ $order->cancel_reason }}</strong>
+            </div>
+        @endif
+        <hr>
+        @if($order->status === 'rezervuotas')
+            <h5 style="font-weight: normal; font-size: 1rem;">Rezervacijos laikas:</h5>
+            <div class="mb-3">
+                <strong>{{ $order->created_at->format('Y-m-d H:i:s') }}</strong>
+            </div>
+            <hr>
+        @endif
 
-                                    <form action="{{ route('checkout.show') }}" method="GET">
-                                        <input type="hidden" name="total" value="{{ $order->total_price }}">
-                                        <input type="hidden" name="city" value="{{ $order->delivery_city }}">
-                                        <input type="hidden" name="order_id" value="{{ $order->id }}">
-                                        <button type="submit" class="btn btn-green">Apmokėti</button>
-                                    </form>
+        <!-- Pirkėjo duomenys -->
+        <h5 style="font-weight: normal; font-size: 1rem;">Pirkėjo informacija:</h5>
+        <div class="mb-3">
+            <strong>Vardas:</strong> {{ $order->first_name }}<br>
+            <strong>Pavardė:</strong> {{ $order->last_name }}<br>
+            <strong>Telefono numeris:</strong> {{ $order->phone }}<br>
+            <strong>El. paštas:</strong> {{ $order->email }}<br>
+        <hr>
+        <h5 style="font-weight: normal; font-size: 1rem;">Papildoma informacija:</h5>
+        <strong>Pastabos:</strong> {{ $order->notes ?? 'Nėra pastabų' }}<br>
+        <hr>
+        <h5 style="font-weight: normal; font-size: 1rem;">Pristatymo adresas:</h5>
+        <div class="mb-3">
+            <strong> Pristatymo miestas: 
+                @if($order->delivery_city == 7)
+                    Vilnius
+                @elseif($order->delivery_city == 10)
+                    Kaunas
+                @else
+                    Nenurodytas miestas
+                @endif
+            </strong><br>
+            <strong>Pristatymo adresas:</strong> {{ $order->delivery_address }}<br>
+            <strong>Pašto kodas:</strong> {{ $order->postal_code }}<br>
+        </div>
+        <hr>
+        <div style="text-align: right;">
+            <h5 style="font-weight: normal; font-size: 1rem;">Pristatymo išlaidos: {{ $order->delivery_city }} €</h5>
+            <h5 style="font-weight: normal; font-size: 1rem;">Bendra suma: <span id="total-cost">{{ $order->total_price }}</span> €</h5>
+        </div>
+        <div class="d-flex justify-content-end gap-2 mt-4">
+            @if($order->status === 'rezervuotas')
+                <div class="d-flex justify-content-end gap-2 mt-4">
 
-                                    {{-- Redagavimo mygtukas --}}
-                                    <form action="{{ route('orders.edit', $order->id) }}" method="GET">
-                                        <button type="submit" class="btn btn-dark">Redaguoti</button>
-                                    </form>
+                    <form action="{{ route('checkout.show') }}" method="GET">
+                        <input type="hidden" name="total" value="{{ $order->total_price }}">
+                        <input type="hidden" name="city" value="{{ $order->delivery_city }}">
+                        <input type="hidden" name="order_id" value="{{ $order->id }}">
+                        <button type="submit" class="btn btn-green">Apmokėti</button>
+                    </form>
 
-                                    {{-- Atšaukimo mygtukas --}}
-                                    <form action="{{ route('orders.destroy', $order->id) }}" method="POST" onsubmit="return confirm('Ar tikrai norite atšaukti šį užsakymą?');">
-                                        @csrf
-                                        @method('DELETE')
-                                        <button type="submit" class="btn btn-danger">Atšaukti rezervaciją</button>
-                                    </form>
-                                </div>
-                            @endif
-                        </div>
-                    </div>
+                    {{-- Redagavimo mygtukas --}}
+                    <form action="{{ route('orders.edit', $order->id) }}" method="GET">
+                        <button type="submit" class="btn btn-dark">Redaguoti</button>
+                    </form>
+
+                    {{-- Atšaukimo mygtukas --}}
+                    <form action="{{ route('orders.destroy', $order->id) }}" method="POST" onsubmit="return confirm('Ar tikrai norite atšaukti šį užsakymą?');">
+                        @csrf
+                        @method('DELETE')
+                        <button type="submit" class="btn btn-danger">Atšaukti rezervaciją</button>
+                    </form>
                 </div>
+            @endif
+        </div>
+    </div>
+</div>
+
             </div>
         @endif
     </div>
