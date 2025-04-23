@@ -61,6 +61,11 @@ class PayPalController extends Controller
         
         // Pridedam visus produktus prie order_items
         foreach ($cart as $productId => $item) {
+            // Praleidžiam prenumeratą, nes neturi tikro product_id
+            if (isset($item['type']) && $item['type'] === 'subscription') {
+                continue;
+            }
+        
             OrderItem::create([
                 'order_id' => $order->id,
                 'product_id' => $productId,
@@ -68,7 +73,22 @@ class PayPalController extends Controller
                 'price' => $item['price'],
             ]);
         }
-
+        
+        foreach ($cart as $item) {
+            if (isset($item['type']) && $item['type'] === 'subscription') {
+                \App\Models\Subscription::create([
+                    'user_id' => auth()->id(),
+                    'order_id' => $order->id, // ← čia pridėjom
+                    'category' => $item['category'],
+                    'size' => $item['size'],
+                    'duration' => $item['duration'],
+                    'price' => $item['price'],
+                    'start_date' => now(),
+                    'status' => 'aktyvi'
+                ]);
+            }
+        }
+        
         // Įkeliam user į order, kad nevežtų klaidos blade šablone
         $order->load('user');
         // Išsiunčiam patvirtinimo laišką

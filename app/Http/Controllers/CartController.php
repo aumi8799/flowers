@@ -40,6 +40,48 @@ class CartController extends Controller
         
         return redirect()->back()->with('success', 'Prekė pridėta į krepšelį!');
     }    
+    public function addSubscriptionToCart(Request $request)
+    {
+        $request->validate([
+            'category' => 'required|string',
+            'size' => 'required|string',
+            'duration' => 'required|integer|min:1',
+        ]);
+    
+        $basePrice = 30;
+        $sizePrices = ['XS' => 0, 'S' => 5, 'M' => 10, 'L' => 15, 'XL' => 20];
+        $size = $request->size;
+        $duration = $request->duration;
+    
+        $finalPrice = ($basePrice + $sizePrices[$size]) * $duration;
+    
+        $subscription = [
+            'name' => 'Puokščių prenumerata',
+            'category' => $request->category,
+            'size' => $size,
+            'duration' => $duration,
+            'price' => $finalPrice,
+            'quantity' => 1,
+            'type' => 'subscription',
+        ];
+    
+        $cart = session()->get('cart', []);
+        $cart['subscription'] = $subscription; // Tik viena prenumerata vienu metu
+        session()->put('cart', $cart);
+    
+        return redirect()->route('cart.view')->with('success', 'Prenumerata pridėta į krepšelį!');
+    }
+    public function removeSubscriptionFromCart()
+{
+    $cart = session()->get('cart', []);
+
+    if (isset($cart['subscription'])) {
+        unset($cart['subscription']);
+        session()->put('cart', $cart);
+    }
+
+    return redirect()->back()->with('success', 'Prenumerata pašalinta iš krepšelio.');
+}
 
     // Peržiūrėti krepšelį
     public function viewCart()

@@ -25,7 +25,7 @@
                     <i class="far fa-clipboard-list"></i> Užsakymai
                 </a>
                 <a href="#" class="list-group-item list-group-item-action" style="border-radius: 0;">
-                    <i class="fas fa-download"></i> Atsisiuntimai
+                    <i class="fas fa-download"></i> Prenumeratos
                 </a>
                 <a href="#" class="list-group-item list-group-item-action" style="border-radius: 0;">
                     <i class="far fa-map-marker-alt"></i> Adresai

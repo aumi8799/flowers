@@ -35,7 +35,7 @@
                             @endif
                             @if(!$isCourier)
                                 <li><a class="dropdown-item-custom" href="/orders">Užsakymai</a></li>
-                                <li><a class="dropdown-item-custom" href="#">Atsisiuntimai</a></li>
+                                <li><a class="dropdown-item-custom" href="{{ route('subscriptions.index') }}">Prenumeratos</a></li>
                                 <li><a class="dropdown-item-custom" href="/addresses">Adresai</a></li>
                                 <li><a class="dropdown-item-custom" href="{{ route('profile.show') }}">Vartotojo informacija</a></li>
                             @endif
@@ -103,7 +103,7 @@
                     <li class="nav-item dropdown-hover">
                         <a class="nav-link" href="#">SPECIALŪS PASIŪLYMAI</a>
                         <ul class="dropdown-menu-custom">
-                            <li><a class="dropdown-item-custom" href="#">Puokščių Prenumerata</a></li>
+                            <li><a class="dropdown-item-custom" href="/subscriptions">Puokščių Prenumerata</a></li>
                             <li><a class="dropdown-item-custom" href="#">Dovanų Kuponai</a></li>
                         </ul>
                     </li>

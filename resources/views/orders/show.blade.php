@@ -157,6 +157,9 @@
                     </form>
                 </div>
             @endif
+            @if($order->status === 'pristatytas' && !$order->review)
+                                <a href="{{ route('reviews.create', $order->id) }}" class="btn btn-sm btn-outline-primary mt-2">Rašyti atsiliepimą</a>
+                            @endif
         </div>
     </div>
 </div>

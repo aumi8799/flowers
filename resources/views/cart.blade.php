@@ -40,6 +40,33 @@
                             @php $totalPrice = 0; @endphp
 
                             @foreach($cart as $id => $item)
+                            @if(isset($item['type']) && $item['type'] === 'subscription')
+                                @php
+                                    $itemTotal = $item['price'];
+                                    $totalPrice += $itemTotal;
+                                @endphp
+                                <tr>
+                                    <td>
+                                        <img src="{{ asset('images/subscription-icon.png') }}" alt="Prenumerata" class="img-fluid" style="max-width: 80px; height: 80px;">
+                                    </td>
+                                    <td class="align-middle">
+                                        <strong>Gėlių prenumerata</strong><br>
+                                        Kategorija: {{ ucfirst($item['category']) }}<br>
+                                        Dydis: {{ $item['size'] }}<br>
+                                        Trukmė: {{ $item['duration'] }} mėn.
+                                    </td>
+                                    <td class="align-middle">1</td>
+                                    <td class="align-middle">{{ $itemTotal }} €</td>
+                                    <td class="align-middle">
+                                        <form action="{{ route('cart.remove', $id) }}" method="POST" style="display: inline;">
+                                            @csrf
+                                            <button type="submit" style="background: none; border: none; padding: 0;">
+                                                <img src="{{ asset('images/trash-icon.png') }}" alt="Šiukšlių dėžė" style="width: 20px; height: 20px;">
+                                            </button>
+                                        </form>
+                                    </td>
+                                </tr>
+                            @else
                                 @php
                                     $itemTotal = $item['price'] * $item['quantity'];
                                     $totalPrice += $itemTotal;
@@ -60,7 +87,9 @@
                                         </form>
                                     </td>
                                 </tr>
-                            @endforeach
+                            @endif
+                        @endforeach
+
                         </tbody>
                     </table>
                 </div>

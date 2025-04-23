@@ -41,4 +41,9 @@ class Order extends Model
     {
         return $this->hasOne(Review::class);
     }
+    public function subscriptions()
+{
+    return $this->hasMany(Subscription::class);
+}
+
 }

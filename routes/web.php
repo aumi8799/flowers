@@ -54,6 +54,8 @@ Route::post('/cart/add', [CartController::class, 'addToCart'])->name('cart.add')
 Route::get('/cart', [CartController::class, 'viewCart'])->name('cart.view');
 Route::post('/cart/remove/{id}', [CartController::class, 'removeFromCart'])->name('cart.remove');
 Route::post('/cart/clear', [CartController::class, 'clearCart'])->name('cart.clear');
+Route::post('/subscription/add', [CartController::class, 'addSubscriptionToCart'])->name('subscription.add');
+Route::post('/cart/remove-subscription', [CartController::class, 'removeSubscriptionFromCart'])->name('cart.remove.subscription');
 
 use App\Http\Controllers\CatalogController;
 Route::get('/catalog', [CatalogController::class, 'index'])->name('catalog.index');
@@ -142,3 +144,7 @@ Route::get('/courier/tasks/{id}', [OrderController::class, 'courierShow'])->name
 Route::put('/courier/tasks/{order}/delivered', [OrderController::class, 'markAsDelivered'])->name('order.delivered');
 
 Route::post('/orders/{order}/upload-video', [OrderController::class, 'uploadVideo'])->name('order.uploadVideo');
+
+use App\Http\Controllers\SubscriptionController;
+
+Route::middleware('auth')->get('/subscriptions', [SubscriptionController::class, 'index'])->name('subscriptions.index');
