@@ -21,6 +21,9 @@ class OrderController extends Controller
     $order->notes = $request->notes;
     $order->total_price = $request->total_price;
     $order->status = 'rezervuotas'; 
+    $order->video = $request->delivery_video;
+
+
     $order->save();
 
     $cart = session()->get('cart', []);
@@ -32,6 +35,7 @@ class OrderController extends Controller
             'price' => $item['price']
         ]);
     }
+
 
     session()->forget('cart');
 
@@ -65,6 +69,7 @@ class OrderController extends Controller
             'notes' => $request->notes,
             'total_price' => $request->total, // Priklausomai nuo to, kaip perduodate šią informaciją
             'status' => 'rezervuotas', // Pradinė būsena
+            'video' => $request->delivery_video,
         ]);
 
         // Peradresavimas į PayPal apmokėjimo puslapį
@@ -137,50 +142,71 @@ class OrderController extends Controller
         $request->validate([
             'delivery_city' => 'required|integer',
             'quantities' => 'required|array',
-    
             // Nauji validacijos laukeliai
             'first_name' => 'nullable|string|max:255',
             'last_name' => 'nullable|string|max:255',
             'phone' => 'nullable|string|max:30',
             'email' => 'nullable|email|max:255',
-            'delivery_address' => 'nullable|string|max:255',
-            'postal_code' => 'nullable|string|max:20',
             'notes' => 'nullable|string|max:1000',
+            'video' => 'nullable|boolean', // pridėjome validaciją vaizdo įrašui
         ]);
     
-        // Atnaujinti pristatymo miestą
-        $order->delivery_city = $request->delivery_city;
-    
-        // Nauji atnaujinami laukeliai
+        // Atnaujiname užsakymo duomenis
         $order->first_name = $request->first_name;
         $order->last_name = $request->last_name;
         $order->phone = $request->phone;
         $order->email = $request->email;
+        $order->notes = $request->notes;
+        $order->delivery_city = $request->delivery_city;
         $order->delivery_address = $request->delivery_address;
         $order->postal_code = $request->postal_code;
-        $order->notes = $request->notes;
     
-        $total = 0;
+        // Jei pasirinktas vaizdo įrašas, pridedame 5 eurus
+        if ($request->video == 1) {
+            $order->video = 1;
+        } else {
+            $order->video = 0;
+        }
     
-        // Atnaujinti prekių kiekius ir perskaičiuoti bendrą sumą
-        foreach ($order->items as $item) {
-            if (isset($request->quantities[$item->id])) {
-                $item->quantity = $request->quantities[$item->id];
+        $order->save();
+    
+        // Atnaujinti prekių kiekius ir sumas
+        foreach ($request->quantities as $itemId => $quantity) {
+            $item = $order->items()->find($itemId);
+            if ($item) {
+                $item->quantity = $quantity;
                 $item->save();
-    
-                $total += $item->quantity * $item->price;
             }
         }
     
-        // Pridėti pristatymo kainą prie bendros sumos
-        $deliveryCost = (int) $request->delivery_city; // 7 arba 10
-        $total += $deliveryCost;
+        // Apskaičiuoti bendra užsakymo kainą
+        $total = 0;
+        foreach ($order->items as $item) {
+            $total += $item->price * $item->quantity;
+        }
     
+        // Jei pasirinktas vaizdo įrašas, pridedame 5 EUR
+        if ($order->video == 1) {
+            $total += 5;  // Pridedame 5 EUR, jei užsakytas vaizdo įrašas
+        }
+    
+        // Pristatymo kaina priklauso nuo pasirinkto miesto
+        $shippingCost = 0;
+        if ($order->delivery_city == 7) {
+            $shippingCost = 7; // Vilnius
+        } elseif ($order->delivery_city == 10) {
+            $shippingCost = 10; // Kaunas
+        }
+    
+        $total += $shippingCost;  // Pridedame pristatymo kainą
+    
+        // Išsaugoti bendrą kainą (jei norite, galite sukurti atskirą lauką `total_price`)
         $order->total_price = $total;
         $order->save();
     
-        return redirect()->route('orders.show', $order->id)->with('success', 'Užsakymas atnaujintas sėkmingai!');
+        return redirect()->route('orders.show', $order->id)->with('success', 'Užsakymas sėkmingai atnaujintas.');
     }
+    
     
     public function courierTasks(Request $request)
     {
@@ -202,7 +228,6 @@ class OrderController extends Controller
         // Grąžinti užsakymus į peržiūros šabloną
         return view('courier.tasks', compact('orders'));
     }
-    
 
         public function markAsDelivered($orderId)
         {
@@ -220,7 +245,22 @@ class OrderController extends Controller
             return redirect('/courier/tasks')->with('success', 'Užsakymas pažymėtas kaip pristatytas.');
 
         }
-
+        public function uploadVideo(Request $request, $id)
+        {
+            $request->validate([
+                'video_file' => 'required|mimes:mp4|max:51200000',
+            ]);
+        
+            $path = $request->file('video_file')->store('videos', 'public');
+        
+            
+            $order = Order::findOrFail($id);
+            $order->video_path = $path;
+            $order->save();
+        
+            return back()->with('success', 'Vaizdo įrašas įkeltas sėkmingai.');
+        }
+        
 
         public function courierShow($id)
         {

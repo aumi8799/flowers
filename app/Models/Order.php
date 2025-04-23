@@ -23,6 +23,7 @@ class Order extends Model
         'postal_code',     // Pridėtas pašto kodas
         'notes',           // Pridėtos pastabos
         'video',
+        'video_path',
     ];
 
     // Ryšys su užsakymo prekėmis

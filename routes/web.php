@@ -140,3 +140,5 @@ Route::middleware(['auth', 'role:courier'])->group(function () {
 Route::get('/courier/tasks', [OrderController::class, 'courierTasks'])->name('courier.tasks');
 Route::get('/courier/tasks/{id}', [OrderController::class, 'courierShow'])->name('courier.show');
 Route::put('/courier/tasks/{order}/delivered', [OrderController::class, 'markAsDelivered'])->name('order.delivered');
+
+Route::post('/orders/{order}/upload-video', [OrderController::class, 'uploadVideo'])->name('order.uploadVideo');

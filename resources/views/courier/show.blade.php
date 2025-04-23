@@ -13,35 +13,49 @@
 </header>
 
 <div class="container my-5">
-    <h2>Užsakymo informacija</h2>
-    <div class="card mb-4">
+    <h2 class="mb-4">Užsakymo informacija</h2>
+    
+    <!-- Užsakymo duomenų kortelė -->
+    <div class="card mb-4 shadow-sm border-light">
         <div class="card-body">
             <p><strong>Užsakymo ID:</strong> {{ $order->id }}</p>
-            <p><strong>Užsakovo duomenys:</strong> 
-            <p><strong>Vardas:</strong> {{ $order->first_name }} </p>  
-            <p><strong>Pavardė</strong> {{ $order->last_name }} </p>  
-            <p><strong>Telefono numeris:</strong> {{ $order->phone }} </p>  
-            <p><strong>El. paštas:</strong> {{ $order->email }} </p>  
-            <p><strong>Pristatymo informacija:</strong>  
-            <p><strong>Pristatymo miestas:</strong>          
-                             @if($order->delivery_city == 7)
-                                Vilnius
-                            @elseif($order->delivery_city == 10)
-                                Kaunas
-                            @else
-                                Nenurodytas miestas
-                            @endif
-                        </p>
-            <p><strong>Pristatymo adresas:</strong> {{ $order->delivery_address}} </p>  
-            <p><strong>Pašto kodas:</strong> {{ $order->postal_code }} </p>  
-            <p><strong>Pastabos:</strong> {{ $order->notes }} </p>             
+            <p><strong>Užsakovo duomenys:</strong></p>
+            <ul>
+                <li><strong>Vardas:</strong> {{ $order->first_name }}</li>  
+                <li><strong>Pavardė:</strong> {{ $order->last_name }}</li>  
+                <li><strong>Telefono numeris:</strong> {{ $order->phone }}</li>  
+                <li><strong>El. paštas:</strong> {{ $order->email }}</li>  
+            </ul>
+            <p><strong>Pristatymo informacija:</strong></p>
+            <ul>
+                <li><strong>Pristatymo miestas:</strong>
+                    @if($order->delivery_city == 7)
+                        Vilnius
+                    @elseif($order->delivery_city == 10)
+                        Kaunas
+                    @else
+                        Nenurodytas miestas
+                    @endif
+                </li>
+                <li><strong>Pristatymo adresas:</strong> {{ $order->delivery_address }}</li>  
+                <li><strong>Pašto kodas:</strong> {{ $order->postal_code }}</li>  
+                <li><strong>Pastabos:</strong> {{ $order->notes }}</li>             
+            </ul>
             <p><strong>Bendra suma:</strong> {{ $order->total_price }}€</p>
             <p><strong>Statusas:</strong> {{ $order->status }}</p>
+            <p><strong>Ar reikia filmuoti pristatymą:</strong> 
+                @if($order->video == 1) 
+                    Taip
+                @else
+                    Ne
+                @endif
+            </p>
         </div>
     </div>
 
-    <h4>Prekės</h4>
-    <table class="table">
+    <!-- Prekės -->
+    <h4 class="mb-4">Prekės</h4>
+    <table class="table table-striped table-bordered">
         <thead>
             <tr>
                 <th>Prekė</th>
@@ -60,14 +74,34 @@
         </tbody>
     </table>
 
-    <a href="/courier/tasks" class="btn btn-secondary">Grįžti</a>
+    <!-- Grįžimo nuoroda -->
+    <form action="/courier/tasks" method="GET" style="display:inline;">
+    <button type="submit" class="btn btn-secondary mb-4">Grįžti</button>
+</form>
+
+
+    <!-- Vaizdo įrašo įkėlimas -->
+    @if($order->video == 1 && !$order->video_path)
+    <form action="{{ route('order.uploadVideo', $order->id) }}" method="POST" enctype="multipart/form-data" class="mb-3">
+        @csrf
+        <div class="mb-2">
+            <label for="video_file" class="form-label">Įkelti vaizdo įrašą (MP4):</label>
+            <input type="file" name="video_file" id="video_file" accept="video/mp4" class="form-control" required>
+        </div>
+        <button type="submit" class="btn btn-primary">Įkelti vaizdo įrašą</button>
+    </form>
+    @endif
+
+    <!-- Užsakymo statuso atnaujinimas -->
     @if($order->status != 'pristatytas')
     <form action="{{ route('order.delivered', $order->id) }}" method="POST" style="display:inline;">
         @csrf
         @method('PUT')
-        <button type="submit" class="btn btn-success">Pažymėti kaip pristatytą</button>
+        <button type="submit" class="btn btn-success"
+            @if($order->video == 1 && !$order->video_path) disabled @endif>
+            Pažymėti kaip pristatytą
+        </button>
     </form>
-@endif
-
+    @endif
 </div>
 @endsection

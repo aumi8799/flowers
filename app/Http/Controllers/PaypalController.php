@@ -56,9 +56,9 @@ class PayPalController extends Controller
         $order->delivery_city = session('delivery_city');
         $order->notes = session('notes');
         $order->total_price = session('total_price');
+        $order->video = session('video');
         $order->save();
         
-
         // Pridedam visus produktus prie order_items
         foreach ($cart as $productId => $item) {
             OrderItem::create([
@@ -71,12 +71,11 @@ class PayPalController extends Controller
 
         // Įkeliam user į order, kad nevežtų klaidos blade šablone
         $order->load('user');
-
         // Išsiunčiam patvirtinimo laišką
         Mail::to(Auth::user()->email)->send(new OrderPaidConfirmationMail($order));
 
         // Išvalom krepšelį
-        session()->forget(['cart', 'first_name', 'last_name', 'phone', 'email', 'delivery_address', 'postal_code', 'delivery_city', 'notes', 'total_price']);
+        session()->forget(['cart', 'first_name', 'last_name', 'phone', 'email', 'delivery_address', 'postal_code', 'delivery_city', 'notes', 'total_price', 'delivery_video']);
 
         return view('checkout_success');
     }

@@ -92,6 +92,27 @@
         <hr>
         <h5 style="font-weight: normal; font-size: 1rem;">Papildoma informacija:</h5>
         <strong>Pastabos:</strong> {{ $order->notes ?? 'Nėra pastabų' }}<br>
+        @if($order->video == 1) 
+            <strong>Pristatymo vaizdo įrašas:</strong> Užsakytas<br>
+        @else
+            <strong>Pristatymo vaizdo įrašas:</strong> Ne užsakytas<br>
+        @endif
+        @if($order->status === 'pristatytas' && $order->video == 1)
+                <hr>
+                <h5 style="font-weight: normal; font-size: 1rem;">Galite peržiūrėti arba atsisiųsti vaizdo įrašą:</h5>
+                <div class="mb-3">
+                    <div class="d-flex gap-1">
+                        <!-- Peržiūros nuoroda -->
+                        <a href="{{ asset('storage/' . $order->video_path) }}" class="btn btn-primary" target="_blank">
+                            <i class="fas fa-video"></i> Peržiūrėti vaizdo įrašą
+                        </a>
+                        <!-- Atsisiuntimo nuoroda -->
+                        <a href="{{ asset('storage/' . $order->video_path) }}" download class="btn btn-secondary">
+                            <i class="fas fa-download"></i> Atsisiųsti vaizdo įrašą
+                        </a>
+                    </div>
+                </div>
+        @endif
         <hr>
         <h5 style="font-weight: normal; font-size: 1rem;">Pristatymo adresas:</h5>
         <div class="mb-3">

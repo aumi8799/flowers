@@ -82,6 +82,11 @@
                     <label for="notes" class="form-label mt-2">Pastabos</label>
                     <textarea name="notes" id="notes" class="form-control">{{ $order->notes }}</textarea>
                     </div>
+                    <h5 style="font-weight: normal; font-size: 1rem;">Vaizdo įrašas:</h5>
+                    <div class="form-check">
+                        <input type="checkbox" name="video" id="video" value="1" {{ $order->video == 1 ? 'checked' : '' }} class="form-check-input">
+                        <label class="form-check-label" for="video">Noriu gauti pristatymo vaizdo įrašą (+5 eurų)</label>
+                    </div>
                     <hr>
                     <h5 style="font-weight: normal; font-size: 1rem;">Pristatymo adresas:</h5>
                     <div class="mb-3">
@@ -120,38 +125,51 @@
     const totalPriceElement = document.getElementById('totalPrice');
     const shippingCostElement = document.getElementById('shipping-cost');
     const citySelect = document.getElementById('delivery-city-select');
+    const deliveryVideoCheckbox = document.getElementById('video');
 
-    function updateTotal() {
-        let total = 0;
+function updateTotal() {
+    let total = 0;
 
-        quantityInputs.forEach(input => {
-            const qty = parseInt(input.value);
-            const price = parseFloat(input.dataset.price);
-            if (!isNaN(qty) && !isNaN(price)) {
-                const itemTotal = qty * price;
-                total += itemTotal;
-                input.closest('tr').querySelector('.item-total').innerText = itemTotal.toFixed(2) + ' €';
-            }
-        });
-
-        const shipping = parseFloat(shippingCostElement.innerText) || 0;
-        totalPriceElement.innerText = (total + shipping).toFixed(2) + ' €';
-    }
-
-    function updateShippingCost() {
-        const selectedValue = parseFloat(citySelect.value) || 0;
-        shippingCostElement.innerText = selectedValue.toFixed(2);
-        updateTotal();
-    }
-
-    // Kiekvienam inputui priskirti change listenerį
     quantityInputs.forEach(input => {
-        input.addEventListener('input', updateTotal);
+        const qty = parseInt(input.value);
+        const price = parseFloat(input.dataset.price);
+        if (!isNaN(qty) && !isNaN(price)) {
+            const itemTotal = qty * price;
+            total += itemTotal;
+            input.closest('tr').querySelector('.item-total').innerText = itemTotal.toFixed(2) + ' €';
+        }
     });
 
-    // Kai puslapis užsikrauna
-    document.addEventListener('DOMContentLoaded', () => {
-        updateShippingCost(); // automatiškai įkelia pristatymo kainą ir atnaujina total
-    });
+    const shipping = parseFloat(shippingCostElement.innerText) || 0;
+    const videoFee = deliveryVideoCheckbox && deliveryVideoCheckbox.checked ? 5 : 0;
+
+    totalPriceElement.innerText = (total + shipping + videoFee).toFixed(2) + ' €';
+}
+
+function updateShippingCost() {
+    const selectedValue = parseFloat(citySelect.value) || 0;
+    shippingCostElement.innerText = selectedValue.toFixed(2);
+    updateTotal();
+}
+
+// Priskirti event'us
+quantityInputs.forEach(input => {
+    input.addEventListener('input', updateTotal);
+});
+
+if (deliveryVideoCheckbox) {
+    deliveryVideoCheckbox.addEventListener('change', updateTotal);
+}
+
+if (citySelect) {
+    citySelect.addEventListener('change', updateShippingCost);
+}
+
+document.addEventListener('DOMContentLoaded', () => {
+    updateShippingCost(); // įkelia pristatymo kainą
+    updateTotal(); // paskaičiuoja pradinę bendrą sumą
+});
+
 </script>
+
 @endsection

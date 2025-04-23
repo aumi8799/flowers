@@ -23,6 +23,7 @@ class CheckoutController extends Controller
                 'delivery_city' => $request->city,
                 'notes' => $request->notes,
                 'total_price' => $request->total,
+                'video' => $request->delivery_video,
             ]);
         }
     
