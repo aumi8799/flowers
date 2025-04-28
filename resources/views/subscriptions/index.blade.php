@@ -72,6 +72,11 @@
                     </div>
 
                     <h5>
+                        Užsakymo ID: 
+                        <a href="{{ route('orders.show', $subscription->order_id ) }}" class="text-success">#{{ $subscription->order_id }}</a>
+                    </h5>
+
+                    <h5>
                         Prenumeratos ID: 
                         <a href="" class="text-success">#{{ $subscription->id }}</a>
                     </h5>
@@ -84,16 +89,33 @@
                         <strong>Dydis:</strong> {{ $subscription->size }}
                     </p>
 
+                    @php
+                        $startDate = $subscription->start_date ? new DateTime($subscription->start_date) : null;
+                        $endDate = null;
+                        if ($startDate) {
+                            $endDate = clone $startDate;
+                            $endDate->modify('+' . $subscription->duration . ' months');
+                        }
+                    @endphp
+
                     <p class="mb-1">
                         <strong>Trukmė:</strong> {{ $subscription->duration }} mėnesiai
                     </p>
 
+                    @if($startDate && $endDate)
+                        <p class="mb-1">
+                            <strong>Pradžios data:</strong> {{ $startDate->format('Y-m-d') }}
+                        </p>
+                        <p class="mb-2">
+                            <strong>Pabaigos data:</strong> {{ $endDate->format('Y-m-d') }}
+                        </p>
+                    @endif
                     <p class="mb-2">
                         <strong>Kaina:</strong> €{{ $subscription->price }}
                     </p>
 
     
-                    <a href="" class="btn btn-outline-success btn-sm">Peržiūrėti detales</a>
+             <!--   <a href="" class="btn btn-outline-success btn-sm">Peržiūrėti detales</a> --> 
                 </div>
             </div>
             @endforeach

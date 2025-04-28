@@ -98,6 +98,7 @@
                             <li><a class="dropdown-item-custom" href="{{ route('catalog.puokstes') }}">Puokštės</a></li>
                             <li><a class="dropdown-item-custom" href="{{ route('catalog.geles-dezuteje') }}">Gėlės dėžutėje</a></li>
                             <li><a class="dropdown-item-custom" href="{{ route('catalog.miegancios-rozes') }}">Miegančios rožės</a></li>
+                            <li><a class="dropdown-item-custom" href="{{ route('bouquet.create') }}">Kurti puokštę</a></li>
                         </ul>
                     </li>
                     <li class="nav-item dropdown-hover">

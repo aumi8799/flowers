@@ -48,16 +48,17 @@
                                 @endphp
                                 <tr>
                                     <td>
-                                        <img src="{{ asset('images/subscription-icon.png') }}" alt="Prenumerata" class="img-fluid" style="max-width: 80px; height: 80px;">
+                                <strong>Gėlių prenumerata</strong><br>
                                     </td>
                                     <td class="align-middle">
-                                        <strong>Gėlių prenumerata</strong><br>
+                                        <br>
                                         Kategorija: {{ ucfirst($item['category']) }}<br>
                                         Dydis: {{ $item['size'] }}<br>
                                         Trukmė: {{ $item['duration'] }} mėn.
                                     </td>
                                     <td class="align-middle">1</td>
                                     <td class="align-middle">{{ $itemTotal }} €</td>
+                                    <td class="align-middle"></td>
                                     <td class="align-middle">
                                         <form action="{{ route('cart.remove', $id) }}" method="POST" style="display: inline;">
                                             @csrf
@@ -73,8 +74,13 @@
                                     $totalPrice += $itemTotal;
                                 @endphp
                                 <tr>
-                                    <td>
-                                        <img src="{{ asset('images/products/' . $item['image']) }}" alt="{{ $item['name'] }}" class="img-fluid" style="max-width: 80px; height: 80px;">
+                                <td>
+                                       @if (is_array($item) && array_key_exists('image', $item) && !empty($item['image']))
+                                            <img src="{{ asset('images/products/' . $item['image']) }}" alt="{{ $item['name'] }}" class="img-fluid" style="max-width: 80px; height: 80px;">
+                                        @else
+                                            <img src="{{ asset('images/default-bouquet.png') }}" alt="Individuali puokštė" class="img-fluid" style="max-width: 80px; height: 80px;">
+                                        @endif
+
                                     </td>
                                     <td class="align-middle">{{ $item['name'] }}</td>
                                     <td class="align-middle">{{ $item['quantity'] }}</td>
@@ -171,7 +177,7 @@
                         <div class="form-check mb-3">
                             <input class="form-check-input" type="checkbox" id="delivery-video" name="delivery_video" >
                             <label class="form-check-label" for="delivery-video">
-                                Noriu gauti pristatymo vaizdo įrašą
+                                Noriu gauti pristatymo vaizdo įrašą (+5 Eur)
                             </label>
                         </div>
 
@@ -192,31 +198,52 @@
 
                         <!-- Order reservation (prisijungusiems) -->
                         <div class="text-center">
-                        @auth
-                            <form action="{{ route('order.reserve') }}" method="POST">
-                                @csrf
-                                <input type="hidden" name="total_price" id="hidden-total-price" value="{{ $totalPrice }}">
-                                <input type="hidden" id="delivery-city" name="delivery_city" value="">
-                                <input type="hidden" name="first_name" id="hidden-first-name" value="">
-                                <input type="hidden" name="last_name" id="hidden-last-name" value="">
-                                <input type="hidden" name="phone" id="hidden-phone" value="">
-                                <input type="hidden" name="email" id="hidden-email" value="">
-                                <input type="hidden" name="delivery_address" id="hidden-delivery-address" value="">
-                                <input type="hidden" name="postal_code" id="hidden-postal-code" value="">
-                                <input type="hidden" name="notes" id="hidden-notes" value="">
-                                <input type="hidden" name="delivery_video" id="hidden-video" value="">
+@auth
+    @php
+        $hasSubscription = false;
+        foreach ($cart as $item) {
+            if (isset($item['type']) && $item['type'] === 'subscription') {
+                $hasSubscription = true;
+                break;
+            }
+        }
+    @endphp
 
-                                <button type="submit" class="btn btn-success mt-3" id="reserve-order-btn" disabled>
-                                    Rezervuoti užsakymą
-                                </button>
-                            </form>
-                            @else
-                                <p class="mt-3" style="font-size: 1.1rem;">Jei norite rezervuoti ar nusipirkti prekę, prašome 
-                                    <a href="{{ route('login') }}" class="text-success">prisijungti</a> 
-                                    arba 
-                                    <a href="{{ route('register') }}" class="text-success">užsiregistruoti</a>.
-                                </p>
-                            @endauth
+    @if($hasSubscription)
+        <div class="alert alert-danger mt-3">
+            Krepšelyje yra prenumerata. Prenumeratų rezervuoti negalima.<br>
+            Pašalinkite prenumeratą, jei norite rezervuoti kitus produktus.
+        </div>
+    @else
+        <form action="{{ route('order.reserve') }}" method="POST">
+            @csrf
+            <input type="hidden" name="total_price" id="hidden-total-price" value="{{ $totalPrice }}">
+            <input type="hidden" id="delivery-city" name="delivery_city" value="">
+            <input type="hidden" name="first_name" id="hidden-first-name" value="">
+            <input type="hidden" name="last_name" id="hidden-last-name" value="">
+            <input type="hidden" name="phone" id="hidden-phone" value="">
+            <input type="hidden" name="email" id="hidden-email" value="">
+            <input type="hidden" name="delivery_address" id="hidden-delivery-address" value="">
+            <input type="hidden" name="postal_code" id="hidden-postal-code" value="">
+            <input type="hidden" name="notes" id="hidden-notes" value="">
+            <input type="hidden" name="delivery_video" id="hidden-video" value="">
+
+            <button type="submit" class="btn btn-success mt-3" id="reserve-order-btn" disabled>
+                Rezervuoti užsakymą
+            </button>
+            <p class="mt-3" style="font-size: 1.1rem;">Rezervacijos laikas 30 min</p>
+        </form>
+    @endif
+@else
+    <p class="mt-3" style="font-size: 1.1rem;">
+        Jei norite rezervuoti ar nusipirkti prekę, prašome 
+        <a href="{{ route('login') }}" class="text-success">prisijungti</a> 
+        arba 
+        <a href="{{ route('register') }}" class="text-success">užsiregistruoti</a>.
+    </p>
+@endauth
+</div>
+
 
                         </div>
                     </div>

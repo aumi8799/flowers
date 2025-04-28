@@ -157,3 +157,7 @@ Route::get('/postcard/canva', function () {
     return view('postcard.canva');
 })->name('postcard.canva');
 
+use App\Http\Controllers\BouquetController;
+
+Route::get('/bouquet/create', [BouquetController::class, 'create'])->name('bouquet.create');
+Route::post('/bouquet/store', [BouquetController::class, 'store'])->name('bouquet.store');

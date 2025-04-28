@@ -45,5 +45,9 @@ class Order extends Model
 {
     return $this->hasMany(Subscription::class);
 }
+public function postcard()
+{
+    return $this->hasOne(\App\Models\Postcard::class, 'order_id', 'id');
+}
 
 }

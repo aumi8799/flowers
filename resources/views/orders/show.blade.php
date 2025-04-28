@@ -31,8 +31,11 @@
                             <tr>
                                 <th>Prekė</th>
                                 <th></th>
-                                <th>Kiekis</th>
+                                <th>Kiekis</th>   
                                 <th>Suma</th>
+                                <th>Atvirukas</th>
+                             
+
                             </tr>
                         </thead>
                         <tbody>
@@ -52,8 +55,43 @@
                                     <td class="align-middle">{{ $item->product->name }}</td>
                                     <td class="align-middle">{{ $item->quantity }}</td>
                                     <td class="align-middle">{{ $itemTotal }} €</td>
+                                    <td class="align-middle">
+                                @if($order->postcard)
+                                    <i class="fas fa-check-circle" style="color: green; font-size: 1.5rem;"></i>
+                                @else
+                                    <i class="fas fa-times-circle" style="color: gray; font-size: 1.5rem;"></i>
+                                @endif
+                            </td>
                                 </tr>
                             @endforeach
+
+                            {{-- Prenumeratos atvaizdavimas tokiu pačiu stiliumi kaip krepšelyje --}}
+                            @foreach($order->subscriptions as $subscription)
+                                @php
+                                    $subscriptionTotal = $subscription->price;
+                                    $totalPrice += $subscriptionTotal;
+
+                                    $startDate = $subscription->start_date ? new DateTime($subscription->start_date) : null;
+                                    $endDate = null;
+                                    if ($startDate) {
+                                        $endDate = clone $startDate;
+                                        $endDate->modify('+' . $subscription->duration . ' months');
+                                    }
+                                @endphp
+                                <tr>
+                                    <td>
+                                        <img src="{{ asset('images/subscription-icon.png') }}" alt="Prenumerata" class="img-fluid" style="max-width: 80px; height: 80px;">
+                                    </td>
+                                    <td class="align-middle">
+                                        <strong>Gėlių prenumerata</strong><br>
+                                        Kategorija: {{ ucfirst($subscription->category) }}<br>
+                                        Dydis: {{ $subscription->size }}<br>
+                                    </td>
+                                    <td class="align-middle">1</td>
+                                    <td class="align-middle">{{ $subscriptionTotal }} €</td>
+                                </tr>
+                            @endforeach
+
                         </tbody>
                     </table>
                 </div>
@@ -93,7 +131,7 @@
         <h5 style="font-weight: normal; font-size: 1rem;">Papildoma informacija:</h5>
         <strong>Pastabos:</strong> {{ $order->notes ?? 'Nėra pastabų' }}<br>
         @if($order->video == 1) 
-            <strong>Pristatymo vaizdo įrašas:</strong> Užsakytas<br>
+            <strong>Pristatymo vaizdo įrašas:</strong> Užsakytas (+5 eur)<br>
         @else
             <strong>Pristatymo vaizdo įrašas:</strong> Ne užsakytas<br>
         @endif
