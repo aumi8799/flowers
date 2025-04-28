@@ -147,4 +147,13 @@ Route::post('/orders/{order}/upload-video', [OrderController::class, 'uploadVide
 
 use App\Http\Controllers\SubscriptionController;
 
-Route::middleware('auth')->get('/subscriptions', [SubscriptionController::class, 'index'])->name('subscriptions.index');
+Route::middleware('auth')->get('/subscriptionss', [SubscriptionController::class, 'index'])->name('subscriptions.index');
+
+
+// Atvirukas
+use App\Http\Controllers\PostcardController;
+
+Route::get('/postcard/canva', function () {
+    return view('postcard.canva');
+})->name('postcard.canva');
+

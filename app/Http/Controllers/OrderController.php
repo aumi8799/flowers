@@ -32,7 +32,8 @@ class OrderController extends Controller
             'order_id' => $order->id,
             'product_id' => $productId,
             'quantity' => $item['quantity'],
-            'price' => $item['price']
+            'price' => $item['price'],
+
         ]);
     }
 
@@ -71,6 +72,16 @@ class OrderController extends Controller
             'status' => 'rezervuotas', // Pradinė būsena
             'video' => $request->delivery_video,
         ]);
+        // Pridėkite atviruką priklausomai nuo pasirinkimo
+        if ($request->has('postcard')) {
+            \App\Models\Postcard::create([
+                'order_id' => $order->id,
+                'template' => $request->postcard_template,
+                'message' => $request->postcard_message,
+                'method' => $request->postcard_method,
+                'file_path' => $request->postcard_file ? $request->file('postcard_file')->store('postcards') : null,
+            ]);
+        }
 
         // Peradresavimas į PayPal apmokėjimo puslapį
         return redirect()->route('paypal.payment', ['order_id' => $order->id, 'total' => $order->total_price]);

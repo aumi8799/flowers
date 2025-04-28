@@ -89,11 +89,61 @@
                     </div>
                 @endif
 
+                <!-- Atviruko pasirinkimas -->
+
+                <!-- VARNELĖ: Ar nori atviruko -->
+                <div class="form-group mb-3">
+                    <label>
+                    <input type="checkbox" id="addPostcard" name="add_postcard" value="1" onchange="togglePostcardOptions()">
+                        Pridėti atviruką prie šio užsakymo. 
+                    </label>
+                </div>
+
+                <!-- PASIRINKIMAS: Kuris būdas -->
+                <div id="postcardOptions" style="display: none;" class="mb-3">
+                    <label><strong>Pasirink atviruko kūrimo būdą:</strong></label><br>
+                    <input type="radio" name="postcard_method" value="simple" onclick="togglePostcardMethod()" checked> Paprastas<br>
+                    <input type="radio" name="postcard_method" value="canva" onclick="togglePostcardMethod()"> Canva<br>
+                </div>
+
+                <!-- PAPRASTAS ATVIRUKAS -->
+                <div id="simplePostcardForm" style="display: none;">
+                    <div class="form-group mb-2">
+                        <label for="postcard_template">Šablonas:</label>
+                        <select name="postcard_template" id="postcard_template" class="form-control" style="width: 300px;">
+                            <option value="birthday">Gimtadienis</option>
+                            <option value="love">Meilė</option>
+                            <option value="thank_you">Ačiū</option>
+                        </select>
+                    </div>
+
+                    <div class="form-group mb-2">
+                        <label for="postcard_message">Tavo žinutė:</label>
+                        <textarea name="postcard_message" id="postcard_message" class="form-control" rows="3" style="width: 300px;"></textarea>
+                    </div>
+                </div>
+
+                <!-- CANVA ATVIRUKAS -->
+                <div id="canvaPostcardForm" style="display: none;" class="mt-3">
+                    <a href="{{ route('postcard.canva') }}" target="_blank" class="btn btn-outline-success mb-2">
+                        🎨 Kurti atviruką su Canva
+                    </a>
+
+                    <div class="form-group">
+                        <label for="postcard_upload">Įkelk sukurtą atviruką (PNG/PDF):</label>
+                        <input type="file" name="postcard_file" class="form-control-file" accept=".png,.pdf">
+                    </div>
+                </div>
+
+
+                <!-- Pridėjimas į krepšelį -->
+
                 <button type="submit" class="add-to-cart-btn">Įdėti į krepšelį</button>
             </form>
         </div>
     </div>
 </div>
+
 
 <script>
     function toggleWrapOptions() {
@@ -148,5 +198,19 @@
 
         return true;
     }
+
+    function togglePostcardOptions() {
+        const checkbox = document.getElementById('addPostcard');
+        document.getElementById('postcardOptions').style.display = checkbox.checked ? 'block' : 'none';
+        document.getElementById('simplePostcardForm').style.display = checkbox.checked ? 'block' : 'none'; // default
+        document.getElementById('canvaPostcardForm').style.display = 'none';
+    }
+
+    function togglePostcardMethod() {
+        const selected = document.querySelector('input[name="postcard_method"]:checked').value;
+        document.getElementById('simplePostcardForm').style.display = selected === 'simple' ? 'block' : 'none';
+        document.getElementById('canvaPostcardForm').style.display = selected === 'canva' ? 'block' : 'none';
+    }
+    
 </script>
 @endsection

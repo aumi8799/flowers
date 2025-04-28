@@ -15,6 +15,18 @@ class CartController extends Controller
         $price = $request->price;
         $quantity = $request->quantity; // Naudojame kiekių reikšmę iš užklausos
         $image = $request->image;
+        
+        // Failo kintamasis pradžioje
+        $path_to_file = null;
+
+        // Jei buvo įkeltas failas (pvz. iš Canva)
+        if ($request->hasFile('postcard_file')) {
+            $file = $request->file('postcard_file');
+            $fileName = time() . '_' . $file->getClientOriginalName();
+            $file->move(public_path('uploads/postcards'), $fileName);
+            $path_to_file = 'uploads/postcards/' . $fileName;
+        }
+
 
         if (isset($cart[$productId])) {
             $cart[$productId]['quantity'] += $quantity; // Pridedame pasirinkta kiekį
@@ -24,6 +36,16 @@ class CartController extends Controller
                 "price" => $price,
                 "quantity" => $quantity, 
                 "image" => $request->image,
+            ];
+        }
+
+        // Jei pridėtas atvirukas
+        if ($request->has('add_postcard') && $request->add_postcard == '1') {
+            $cart[$productId]['postcard'] = [
+                "method" => $request->postcard_method ?? 'simple',
+                "template" => $request->postcard_template,
+                "message" => $request->postcard_message,
+                "uploaded_file" => $path_to_file,
             ];
         }
         

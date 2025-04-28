@@ -33,6 +33,7 @@
                                 <th></th>
                                 <th>Kiekis</th>
                                 <th>Suma</th>
+                                <th>Atvirukas</th>
                                 <th></th>
                             </tr>
                         </thead>
@@ -78,6 +79,15 @@
                                     <td class="align-middle">{{ $item['name'] }}</td>
                                     <td class="align-middle">{{ $item['quantity'] }}</td>
                                     <td class="align-middle">{{ $itemTotal }} €</td>
+                                    <td class="align-middle">
+                                        @if(isset($item['postcard']) && !empty($item['postcard']))
+                                            <i class="fas fa-check-circle" style="color: green; font-size: 1.5rem;"></i>
+                                        @else
+                                            <i class="fas fa-times-circle" style="color: gray; font-size: 1.5rem;"></i>
+                                        @endif
+
+                                    </td>
+
                                     <td class="align-middle">
                                         <form action="{{ route('cart.remove', $id) }}" method="POST" style="display: inline;">
                                             @csrf
