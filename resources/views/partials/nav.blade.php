@@ -2,6 +2,7 @@
     <div class="container d-flex justify-content-between align-items-center w-100">
     @php
     $isCourier = Auth::check() && Auth::user()->role === 'courier';
+    $isAdmin = Auth::check() && Auth::user()->role === 'admin';
     @endphp
         <!-- Search Form -->
         <div class="search-container">
@@ -33,7 +34,12 @@
                             @if($isCourier)
                             <li><a class="dropdown-item-custom" href="/courier/tasks">Užduotys</a></li>
                             @endif
-                            @if(!$isCourier)
+                            @if($isAdmin)
+                            <li><a class="dropdown-item-custom" href="/admin/users">Vartotojai</a></li>
+                            <li><a class="dropdown-item-custom" href="/admin/orders">Užsakymų valdymas</a></li>
+                            <li><a class="dropdown-item-custom" href="/admin/reviews">Atsiliepimų valdymas</a></li>                           
+                            @endif
+                            @if(!$isCourier && !$isAdmin)
                                 <li><a class="dropdown-item-custom" href="/orders">Užsakymai</a></li>
                                 <li><a class="dropdown-item-custom" href="{{ route('subscriptions.index') }}">Prenumeratos</a></li>
                                 <li><a class="dropdown-item-custom" href="/addresses">Adresai</a></li>

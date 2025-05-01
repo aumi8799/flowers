@@ -124,9 +124,23 @@ Route::get('/reviews', [ReviewController::class, 'showAll'])->name('reviews.show
 use App\Http\Controllers\AdminController;
 use App\Http\Controllers\CourierController;
 
-Route::middleware(['auth', 'role:admin'])->group(function () {
-    Route::get('/admin', [AdminController::class, 'index'])->name('admin.dashboard');
+// Admino maršrutai
+Route::middleware(['auth', 'admin'])->prefix('admin')->group(function () {
+    Route::get('/dashboard', [App\Http\Controllers\AdminController::class, 'index'])->name('admin.dashboard');
 });
+
+Route::get('/admin/users', [App\Http\Controllers\AdminController::class, 'users'])->name('admin.users');
+Route::get('/admin/orders', [App\Http\Controllers\AdminController::class, 'orders'])->name('admin.orders');
+Route::get('/admin/reviews', [App\Http\Controllers\AdminController::class, 'reviews'])->name('admin.reviews');
+Route::get('/admin/reviews/{review}/edit', [AdminController::class, 'editReview'])->name('admin.reviews.edit');
+Route::put('/admin/reviews/{review}', [AdminController::class, 'updateReview'])->name('admin.reviews.update');
+Route::delete('/admin/reviews/{review}', [AdminController::class, 'destroyReview'])->name('admin.reviews.destroy');
+Route::get('/admin/users/{user}/edit', [AdminController::class, 'editUser'])->name('admin.users.edit');
+Route::put('/admin/users/{user}', [AdminController::class, 'updateUser'])->name('admin.users.update');
+Route::delete('/admin/users/{user}', [AdminController::class, 'destroyUser'])->name('admin.users.destroy');
+Route::get('/admin/orders/{order}', [AdminController::class, 'showOrder'])->name('admin.orders.show');
+Route::get('/admin/orders/{order}/edit', [AdminController::class, 'editOrder'])->name('admin.orders.edit');
+Route::put('/admin/orders/{order}', [AdminController::class, 'updateOrder'])->name('admin.orders.update');
 
 Route::middleware(['auth', 'role:courier'])->group(function () {
     Route::get('/courier', [CourierController::class, 'index'])->name('courier.dashboard');

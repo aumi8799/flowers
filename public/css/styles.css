@@ -11215,6 +11215,17 @@ textarea.form-control-lg {
 .ribbon.atšauktas {
   background: linear-gradient(45deg, #f44336, #e57373);
 }
+.ribbon.admin {
+  background-color: #007bff; /* Mėlyna */
+}
+
+.ribbon.user {
+  background-color: #28a745; /* Žalia */
+}
+
+.ribbon.courier {
+  background-color: #ffc107; /* Geltona */
+}
 .card:hover {
   transform: translateY(-10px);
   transition: transform 0.3s ease-in-out;

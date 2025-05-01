@@ -73,4 +73,5 @@ class BouquetController extends Controller
     
         return redirect()->route('cart.view')->with('success', 'Puokštė sėkmingai pridėta į krepšelį!');
     }
+    
 }
