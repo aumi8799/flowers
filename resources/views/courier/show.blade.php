@@ -60,7 +60,8 @@
             <tr>
                 <th>Prekė</th>
                 <th>Kiekis</th>
-                <th>Kaina</th>
+                <th>Kaina vnt.</th>
+                <th>Atvirukas</th>
             </tr>
         </thead>
         <tbody>
@@ -69,6 +70,11 @@
                     <td>{{ $item->product->name }}</td>
                     <td>{{ $item->quantity }}</td>
                     <td>{{ $item->price }}€</td>
+                    <td>@if($item->postcard)
+                                    <i class="fas fa-check-circle" style="color: green; font-size: 1.5rem;"></i>
+                                @else
+                                    <i class="fas fa-times-circle" style="color: gray; font-size: 1.5rem;"></i>
+                                @endif</td>
                 </tr>
             @endforeach
         </tbody>

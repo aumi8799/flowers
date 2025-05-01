@@ -56,7 +56,7 @@
                                     <td class="align-middle">{{ $item->quantity }}</td>
                                     <td class="align-middle">{{ $itemTotal }} €</td>
                                     <td class="align-middle">
-                                @if($order->postcard)
+                                    @if($item->postcard)
                                     <i class="fas fa-check-circle" style="color: green; font-size: 1.5rem;"></i>
                                 @else
                                     <i class="fas fa-times-circle" style="color: gray; font-size: 1.5rem;"></i>
@@ -64,6 +64,32 @@
                             </td>
                                 </tr>
                             @endforeach
+                            {{-- Individualios puokštės atvaizdavimas --}}
+                                @foreach($order->bouquets as $bouquet)
+                                    @php
+                                        $bouquetItems = json_decode($bouquet->bouquet_data, true);
+                                        $totalPrice += $bouquet->total_price;
+                                    @endphp
+                                    <tr>
+                                        <td>
+                                        <strong>Individuali puokštė</strong><br>
+                                        </td>
+                                        <td class="align-middle">
+                                            @foreach($bouquetItems as $flower)
+                                                - {{ $flower['name'] }} ({{ $flower['quantity'] }} vnt.)<br>
+                                            @endforeach
+                                        </td>
+                                        <td class="align-middle">1</td>
+                                        <td class="align-middle">{{ $bouquet->total_price }} €</td>
+                                        <td class="align-middle">
+                                            @if($order->postcard)
+                                                <i class="fas fa-check-circle" style="color: green; font-size: 1.5rem;"></i>
+                                            @else
+                                                <i class="fas fa-times-circle" style="color: gray; font-size: 1.5rem;"></i>
+                                            @endif
+                                        </td>
+                                    </tr>
+                                @endforeach
 
                             {{-- Prenumeratos atvaizdavimas tokiu pačiu stiliumi kaip krepšelyje --}}
                             @foreach($order->subscriptions as $subscription)
@@ -80,10 +106,9 @@
                                 @endphp
                                 <tr>
                                     <td>
-                                        <img src="{{ asset('images/subscription-icon.png') }}" alt="Prenumerata" class="img-fluid" style="max-width: 80px; height: 80px;">
-                                    </td>
+                                    <strong>Gėlių prenumerata</strong><br>                                    </td>
                                     <td class="align-middle">
-                                        <strong>Gėlių prenumerata</strong><br>
+                                        <br>
                                         Kategorija: {{ ucfirst($subscription->category) }}<br>
                                         Dydis: {{ $subscription->size }}<br>
                                     </td>
@@ -167,6 +192,15 @@
             <strong>Pašto kodas:</strong> {{ $order->postal_code }}<br>
         </div>
         <hr>
+       
+<h5 style="font-weight: normal; font-size: 1rem;">Pristatymo data ir laikas:</h5>
+<div class="mb-3">
+    <strong>Data:</strong>
+    {{ $order->delivery_date ? \Carbon\Carbon::parse($order->delivery_date)->format('Y-m-d') : 'Nenurodyta' }}<br>
+    <strong>Laikas:</strong>
+    {{ $order->delivery_time ?? 'Nenurodytas' }}
+</div>
+<hr>
         <div style="text-align: right;">
             <h5 style="font-weight: normal; font-size: 1rem;">Pristatymo išlaidos: {{ $order->delivery_city }} €</h5>
             <h5 style="font-weight: normal; font-size: 1rem;">Bendra suma: <span id="total-cost">{{ $order->total_price }}</span> €</h5>

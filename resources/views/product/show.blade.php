@@ -1,6 +1,8 @@
 @extends('layouts.app')
 
-@section('title', 'Dekoravimo Paslaugos')
+@section('title')
+    {{ $product->name }}
+@endsection
 
 @section('content')
 <header class="py-5" style="background: url('{{ asset('images/header-bg.jpg') }}') no-repeat center center; background-size: cover; height: 200px; display: flex; align-items: center; justify-content: center;">

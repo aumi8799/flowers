@@ -52,7 +52,7 @@ use App\Http\Controllers\CartController;
 
 Route::post('/cart/add', [CartController::class, 'addToCart'])->name('cart.add');
 Route::get('/cart', [CartController::class, 'viewCart'])->name('cart.view');
-Route::post('/cart/remove/{id}', [CartController::class, 'removeFromCart'])->name('cart.remove');
+Route::post('/cart/remove/{key}', [CartController::class, 'removeFromCart'])->name('cart.remove');
 Route::post('/cart/clear', [CartController::class, 'clearCart'])->name('cart.clear');
 Route::post('/subscription/add', [CartController::class, 'addSubscriptionToCart'])->name('subscription.add');
 Route::post('/cart/remove-subscription', [CartController::class, 'removeSubscriptionFromCart'])->name('cart.remove.subscription');

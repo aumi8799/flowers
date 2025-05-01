@@ -22,30 +22,42 @@ class OrderController extends Controller
     $order->total_price = $request->total_price;
     $order->status = 'rezervuotas'; 
     $order->video = $request->delivery_video;
-
+    $order->delivery_date = $request->delivery_date;
+    $order->delivery_time = $request->delivery_time;    
 
     $order->save();
 
     $cart = session()->get('cart', []);
-    foreach ($cart as $productId => $item) {
-        \App\Models\OrderItem::create([
-            'order_id' => $order->id,
-            'product_id' => $productId,
-            'quantity' => $item['quantity'],
-            'price' => $item['price'],
-
-        ]);
+    foreach ($cart as $item) {
+        $orderItem = null;
+    
+        if ($item['type'] === 'product') {
+            $orderItem = \App\Models\OrderItem::create([
+                'order_id' => $order->id,
+                'product_id' => $item['id'],
+                'quantity' => $item['quantity'],
+                'price' => $item['price'],
+            ]);
+        } elseif ($item['type'] === 'custom_bouquet') {
+            // Priskiriam order_id prie puokštės
+            \App\Models\CustomBouquet::where('id', $item['id'])->update([
+                'order_id' => $order->id,
+            ]);
+        }
+    
+        // Jeigu turi atviruką – priskiriam šitam order_item
+        if (isset($item['postcard'])) {
+            \App\Models\Postcard::create([
+                'order_id' => $order->id,
+                'order_item_id' => $orderItem?->id,
+                'method' => $item['postcard']['method'],
+                'template' => $item['postcard']['template'] ?? null,
+                'message' => $item['postcard']['message'] ?? null,
+                'file_path' => $item['postcard']['uploaded_file'] ?? null,
+            ]);
+        }
     }
-    if (isset($item['postcard']) && !empty($item['postcard'])) {
-        \App\Models\Postcard::create([
-            'order_id' => $order->id,
-            'template' => $item['postcard']['template'] ?? 'numatytas',
-            'message' => $item['postcard']['message'] ?? '',
-            'method' => $item['postcard']['method'] ?? null,
-            'file_path' => $item['postcard']['file_path'] ?? null,
-        ]);
-    }
-
+    
     session()->forget('cart');
 
     return redirect()->route('orders.index')->with('success', 'Užsakymas rezervuotas!');
@@ -63,6 +75,8 @@ class OrderController extends Controller
             'delivery_address' => 'required|string',
             'city' => 'required|string',
             'postal_code' => 'required|string',
+            'delivery_date' => 'required|date|after_or_equal:' . \Carbon\Carbon::now()->addDays(2)->toDateString(),
+            'delivery_time' => 'required|string|in:10:00 - 12:00,12:00 - 15:00,15:00 - 18:00',
         ]);
 
         // Sukurkite naują užsakymą arba apdorokite pagal poreikį
@@ -75,6 +89,8 @@ class OrderController extends Controller
             'delivery_address' => $request->delivery_address,
             'city' => $request->city,
             'postal_code' => $request->postal_code,
+            'delivery_date' => $request->delivery_date,
+            'delivery_time' => $request->delivery_time,
             'notes' => $request->notes,
             'total_price' => $request->total, // Priklausomai nuo to, kaip perduodate šią informaciją
             'status' => 'rezervuotas', // Pradinė būsena
@@ -168,6 +184,8 @@ class OrderController extends Controller
             'email' => 'nullable|email|max:255',
             'notes' => 'nullable|string|max:1000',
             'video' => 'nullable|boolean', // pridėjome validaciją vaizdo įrašui
+            'delivery_date' => 'required|date|after_or_equal:' . now()->addDays(2)->toDateString(),
+            'delivery_time' => 'required|string|in:10:00 - 12:00,12:00 - 15:00,15:00 - 18:00',
         ]);
     
         // Atnaujiname užsakymo duomenis
@@ -179,7 +197,9 @@ class OrderController extends Controller
         $order->delivery_city = $request->delivery_city;
         $order->delivery_address = $request->delivery_address;
         $order->postal_code = $request->postal_code;
-    
+        $order->delivery_date = $request->delivery_date;
+        $order->delivery_time = $request->delivery_time;
+
         // Jei pasirinktas vaizdo įrašas, pridedame 5 eurus
         if ($request->video == 1) {
             $order->video = 1;
@@ -291,6 +311,22 @@ class OrderController extends Controller
 
             return view('courier.show', compact('order'));
         }
-
+        public function index(Request $request)
+        {
+            $query = Order::where('user_id', auth()->id());
+        
+            if ($request->has('status') && $request->status) {
+                $query->where('status', $request->status);
+            }
+        
+            $orders = $query->orderBy('created_at', 'desc')->paginate(5); // mažiau nei default 15
+        
+            if ($request->ajax()) {
+                return view('partials.order-items', compact('orders'))->render();
+            }
+        
+            return view('orders.index', compact('orders'));
+        }
+        
 
 }

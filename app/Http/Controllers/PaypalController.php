@@ -15,7 +15,7 @@ class PayPalController extends Controller
     {
         $cart = session('cart', []);
         $orderId = $request->query('order_id');
-
+    
         if ($orderId) {
             $order = Order::where('id', $orderId)
                         ->where('user_id', Auth::id())
@@ -38,11 +38,11 @@ class PayPalController extends Controller
         if (empty($cart)) {
             return redirect('/')->with('error', 'Krepšelis tuščias.');
         }
-
+    
         if (!Auth::check()) {
             return redirect('/login')->with('error', 'Norėdami pirkti, turite būti prisijungę.');
         }
-
+    
         // Sukuriam naują užsakymą
         $order = new Order();
         $order->user_id = Auth::id();
@@ -53,52 +53,73 @@ class PayPalController extends Controller
         $order->email = session('email');
         $order->delivery_address = session('delivery_address');
         $order->postal_code = session('postal_code');
+        $order->delivery_date = session('delivery_date');
+        $order->delivery_time = session('delivery_time');
         $order->delivery_city = session('delivery_city');
         $order->notes = session('notes');
         $order->total_price = session('total_price');
         $order->video = session('video');
         $order->save();
-        
-        // Pridedam visus produktus prie order_items
-        foreach ($cart as $productId => $item) {
-            // Praleidžiam prenumeratą, nes neturi tikro product_id
-            if (isset($item['type']) && $item['type'] === 'subscription') {
-                continue;
+    
+        // Pridedame produktus ir individualias puokštes
+        foreach ($cart as $item) {
+            if (isset($item['type']) && $item['type'] === 'product') {
+                \App\Models\OrderItem::create([
+                    'order_id' => $order->id,
+                    'product_id' => $item['id'],
+                    'quantity' => $item['quantity'],
+                    'price' => $item['price'],
+                ]);
+            } elseif (isset($item['type']) && $item['type'] === 'custom_bouquet') {
+                \App\Models\CustomBouquet::where('id', $item['id'])->update([
+                    'order_id' => $order->id,
+                ]);
             }
-        
-            OrderItem::create([
-                'order_id' => $order->id,
-                'product_id' => $productId,
-                'quantity' => $item['quantity'],
-                'price' => $item['price'],
-            ]);
         }
-        
+    
+        // Sukuriame subscriptions (jei yra)
         foreach ($cart as $item) {
             if (isset($item['type']) && $item['type'] === 'subscription') {
                 \App\Models\Subscription::create([
                     'user_id' => auth()->id(),
-                    'order_id' => $order->id, // ← čia pridėjom
+                    'order_id' => $order->id,
                     'category' => $item['category'],
                     'size' => $item['size'],
                     'duration' => $item['duration'],
                     'price' => $item['price'],
                     'start_date' => now(),
-                    'status' => 'aktyvi'
+                    'status' => 'aktyvi',
+                ]);
+            }
+        }
+        foreach ($cart as $item) {
+            if (isset($item['postcard']) && !empty($item['postcard'])) {
+                \App\Models\Postcard::create([
+                    'order_id' => $order->id,
+                    'template' => $item['postcard']['template'] ?? 'numatytas',
+                    'message' => $item['postcard']['message'] ?? '',
+                    'method' => $item['postcard']['method'] ?? null,
+                    'file_path' => $item['postcard']['file_path'] ?? null,
                 ]);
             }
         }
         
         // Įkeliam user į order, kad nevežtų klaidos blade šablone
         $order->load('user');
-        // Išsiunčiam patvirtinimo laišką
+    
+        // Siunčiam patvirtinimo laišką
         Mail::to(Auth::user()->email)->send(new OrderPaidConfirmationMail($order));
-
-        // Išvalom krepšelį
-        session()->forget(['cart', 'first_name', 'last_name', 'phone', 'email', 'delivery_address', 'postal_code', 'delivery_city', 'notes', 'total_price', 'delivery_video']);
-
+    
+        // Išvalom sesiją
+        session()->forget([
+            'cart', 'first_name', 'last_name', 'phone', 'email',
+            'delivery_address', 'postal_code','delivery_date','delivery_time', 'delivery_city',
+            'notes', 'total_price', 'delivery_video'
+        ]);
+    
         return view('checkout_success');
     }
+    
 
     public function cancel()
     {

@@ -21,6 +21,8 @@ class Order extends Model
         'email',           // Pridėtas el. paštas
         'delivery_address', // Pridėtas pristatymo adresas
         'postal_code',     // Pridėtas pašto kodas
+        'delivery_date',
+        'delivery_time',
         'notes',           // Pridėtos pastabos
         'video',
         'video_path',
@@ -42,12 +44,16 @@ class Order extends Model
         return $this->hasOne(Review::class);
     }
     public function subscriptions()
-{
-    return $this->hasMany(Subscription::class);
-}
-public function postcard()
-{
-    return $this->hasOne(\App\Models\Postcard::class, 'order_id', 'id');
-}
-
+    {
+        return $this->hasMany(Subscription::class);
+    }
+    public function postcard()
+    {
+        return $this->hasOne(\App\Models\Postcard::class, 'order_id', 'id');
+    }
+    public function bouquets()
+    {
+        return $this->hasMany(\App\Models\CustomBouquet::class);
+    }
+    
 }

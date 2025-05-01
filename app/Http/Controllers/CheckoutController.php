@@ -22,6 +22,8 @@ class CheckoutController extends Controller
                 'postal_code' => $request->postal_code,
                 'delivery_city' => $request->city,
                 'notes' => $request->notes,
+                'delivery_date' => $request->delivery_date,
+                'delivery_time' => $request->delivery_time,
                 'total_price' => $request->total,
                 'video' => $request->delivery_video,
             ]);

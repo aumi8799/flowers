@@ -14,7 +14,7 @@ class CancelExpiredReservations extends Command
     public function handle()
     {
         $expiredOrders = Order::where('status', 'rezervuotas')
-            ->where('created_at', '<', Carbon::now()->subMinutes(2)) // 2 min
+            ->where('created_at', '<', Carbon::now()->subMinutes(30)) 
             ->get();
     
         foreach ($expiredOrders as $order) {
@@ -22,7 +22,7 @@ class CancelExpiredReservations extends Command
             $order->cancel_reason = 'Rezervacijos laikas baigėsi';
             $order->save();
     
-            $this->info("Užsakymas {$order->id} buvo atšauktas, nes praleista 2 min.");
+            $this->info("Užsakymas {$order->id} buvo atšauktas, nes praleista 30 min.");
         }
     }
     

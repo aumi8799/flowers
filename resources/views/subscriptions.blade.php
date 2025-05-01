@@ -14,11 +14,16 @@
     <div class="container my-5">
         <div class="row">
             <div class="col-md-6">
-                <!-- Galbūt čia bus kažkas vėliau -->
+            <img src="{{ asset('images/products/prenumerata.png') }}" class="img-fluid" alt="Prenumerata">
             </div>
             <div class="col-md-6">
-                <h2>Gėlių puokščių prenumerata</h2>
-                <p>Pasirinkite mėgstamą gėlių stilių, puokštės dydį ir prenumeratos trukmę. Pristatysime kiekvieną mėnesį!</p>
+            <h2>Gėlių puokščių prenumerata</h2>
+                <p>
+                    Atraskite nuolatinį gėlių džiaugsmą! <br>
+                    Pasirinkite savo mėgstamą gėlių stilių, puokštės dydį ir prenumeratos trukmę, o mes pasirūpinsime, kad kas mėnesį į jūsų duris atkeliuotų nauja, kruopščiai sukurta gėlių kompozicija. <br>
+                    Kiekvieną kartą gausite vis kitokią, tačiau pasirinktos kategorijos įkvėptą puokštę, kupiną gaivos, spalvų ir šilumos.
+                </p>
+
                 <p><strong>Kaina:</strong> <span id="price">30 €</span></p>
                 <form action="{{ route('subscription.add') }}" method="POST">
                     @csrf

@@ -44,6 +44,26 @@
                                 <td class="align-middle item-total">{{ $item->price * $item->quantity }} €</td>
                             </tr>
                         @endforeach
+
+                        {{-- Individualios puokštės atvaizdavimas --}}
+                        @foreach($order->bouquets as $bouquet)
+                            @php
+                                $bouquetItems = json_decode($bouquet->bouquet_data, true);
+                            @endphp
+                            <tr>
+                                <td>
+                                    <img src="{{ asset('images/custom-bouquet.png') }}" alt="Puokštė" class="img-fluid" style="max-width: 80px; height: 80px;">
+                                </td>
+                                <td class="align-middle">
+                                    <strong>Individuali puokštė</strong><br>
+                                    @foreach($bouquetItems as $flower)
+                                        - {{ $flower['name'] }} ({{ $flower['quantity'] }} vnt.)<br>
+                                    @endforeach
+                                </td>
+                                <td class="align-middle">1</td>
+                                <td class="align-middle bouquet-total" data-price="{{ $bouquet->total_price }}">{{ number_format($bouquet->total_price, 2) }} €</td>
+                            </tr>
+                        @endforeach
                     </tbody>
                 </table>
             </div>
@@ -53,15 +73,11 @@
                     <h2>Užsakymo ID: #{{ $order->id }}</h2>
                     <hr>
                     <h5 style="font-weight: normal; font-size: 1rem;">Būsena:</h5>
-                        <div class="mb-3">
-                            <strong>{{ $order->status }}</strong>
-                        </div>
+                    <div class="mb-3"><strong>{{ $order->status }}</strong></div>
                     <hr>
                     <h5 style="font-weight: normal; font-size: 1rem;">Rezervacijos laikas:</h5>
-                        <div class="mb-3">
-                            <strong>{{ $order->created_at->format('Y-m-d H:i:s') }}</strong>
-                        </div>
-                        <hr>
+                    <div class="mb-3"><strong>{{ $order->created_at->format('Y-m-d H:i:s') }}</strong></div>
+                    <hr>
                     <h5 style="font-weight: normal; font-size: 1rem;">Pirkėjo informacija:</h5>
                     <div class="mb-3">
                         <label for="first_name" class="form-label">Vardas</label>
@@ -79,8 +95,8 @@
                     <hr>
                     <h5 style="font-weight: normal; font-size: 1rem;">Papildoma informacija:</h5>
                     <div class="mb-3">
-                    <label for="notes" class="form-label mt-2">Pastabos</label>
-                    <textarea name="notes" id="notes" class="form-control">{{ $order->notes }}</textarea>
+                        <label for="notes" class="form-label mt-2">Pastabos</label>
+                        <textarea name="notes" id="notes" class="form-control">{{ $order->notes }}</textarea>
                     </div>
                     <h5 style="font-weight: normal; font-size: 1rem;">Vaizdo įrašas:</h5>
                     <div class="form-check">
@@ -91,25 +107,35 @@
                     <h5 style="font-weight: normal; font-size: 1rem;">Pristatymo adresas:</h5>
                     <div class="mb-3">
                         <select class="form-select" id="delivery-city-select" name="delivery_city" onchange="updateShippingCost()">
-                            <option value="" disabled selected>Pasirinkite miestą</option>
-                            <option value="7" {{ $order->delivery_city == 'Vilnius' ? 'selected' : '' }}>Vilnius - 7 €</option>
-                            <option value="10" {{ $order->delivery_city == 'Kaunas' ? 'selected' : '' }}>Kaunas - 10 €</option>
+                            <option value="" disabled>Pasirinkite miestą</option>
+                            <option value="7" {{ $order->delivery_city == 7 ? 'selected' : '' }}>Vilnius - 7 €</option>
+                            <option value="10" {{ $order->delivery_city == 10 ? 'selected' : '' }}>Kaunas - 10 €</option>
                         </select>
-                        <label for="delivery_address" class="form-label">Adresas</label>
+                        <label for="delivery_address" class="form-label mt-2">Adresas</label>
                         <input type="text" name="delivery_address" id="delivery_address" value="{{ $order->delivery_address }}" class="form-control">
 
                         <label for="postal_code" class="form-label mt-2">Pašto kodas</label>
                         <input type="text" name="postal_code" id="postal_code" value="{{ $order->postal_code }}" class="form-control">
 
                         <div>
-                        <strong>Pristatymo kaina: <span id="shipping-cost">0</span> €</strong>
+                            <strong>Pristatymo kaina: <span id="shipping-cost">0</span> €</strong>
+                        </div>
                     </div>
+                    <label for="delivery_date" class="form-label mt-2">Pristatymo data</label>
+                    <input type="text" name="delivery_date" id="delivery_date" class="form-control" value="{{ $order->delivery_date }}" required>
 
-                    </div>
-
+                    <label for="delivery_time" class="form-label mt-2">Pageidaujamas pristatymo laikas</label>
+                    <select name="delivery_time" id="delivery_time" class="form-select" required>
+                        <option value="">Pasirinkite laiką</option>
+                        <option value="10:00 - 12:00" {{ $order->delivery_time == '10:00 - 12:00' ? 'selected' : '' }}>10:00 – 12:00</option>
+                        <option value="12:00 - 15:00" {{ $order->delivery_time == '12:00 - 15:00' ? 'selected' : '' }}>12:00 – 15:00</option>
+                        <option value="15:00 - 18:00" {{ $order->delivery_time == '15:00 - 18:00' ? 'selected' : '' }}>15:00 – 18:00</option>
+                    </select>
+                    <hr>
                     <div style="text-align: right;">
-                            <h5 style="font-weight: normal; font-size: 1rem;">Bendra suma: <span id="totalPrice"> </span></h5>
-                     </div>
+                        <h5 style="font-weight: normal; font-size: 1rem;">Bendra suma: <span id="totalPrice"></span></h5>
+                    </div>
+
                     <div class="d-flex justify-content-end gap-2 mt-4">
                         <button type="submit" class="btn btn-success">Išsaugoti pakeitimus</button>
                         <a href="{{ route('orders.show', $order->id) }}" class="btn btn-secondary">Grįžti</a>
@@ -127,49 +153,67 @@
     const citySelect = document.getElementById('delivery-city-select');
     const deliveryVideoCheckbox = document.getElementById('video');
 
-function updateTotal() {
-    let total = 0;
+    function updateTotal() {
+        let total = 0;
+
+        quantityInputs.forEach(input => {
+            const qty = parseInt(input.value);
+            const price = parseFloat(input.dataset.price);
+            if (!isNaN(qty) && !isNaN(price)) {
+                const itemTotal = qty * price;
+                total += itemTotal;
+                input.closest('tr').querySelector('.item-total').innerText = itemTotal.toFixed(2) + ' €';
+            }
+        });
+
+        // Įtraukiam individualias puokštes
+        document.querySelectorAll('.bouquet-total').forEach(el => {
+            const price = parseFloat(el.dataset.price);
+            if (!isNaN(price)) {
+                total += price;
+            }
+        });
+
+        const shipping = parseFloat(shippingCostElement.innerText) || 0;
+        const videoFee = deliveryVideoCheckbox && deliveryVideoCheckbox.checked ? 5 : 0;
+
+        totalPriceElement.innerText = (total + shipping + videoFee).toFixed(2) + ' €';
+    }
+
+    function updateShippingCost() {
+        const selectedValue = parseFloat(citySelect.value) || 0;
+        shippingCostElement.innerText = selectedValue.toFixed(2);
+        updateTotal();
+    }
 
     quantityInputs.forEach(input => {
-        const qty = parseInt(input.value);
-        const price = parseFloat(input.dataset.price);
-        if (!isNaN(qty) && !isNaN(price)) {
-            const itemTotal = qty * price;
-            total += itemTotal;
-            input.closest('tr').querySelector('.item-total').innerText = itemTotal.toFixed(2) + ' €';
-        }
+        input.addEventListener('input', updateTotal);
     });
 
-    const shipping = parseFloat(shippingCostElement.innerText) || 0;
-    const videoFee = deliveryVideoCheckbox && deliveryVideoCheckbox.checked ? 5 : 0;
+    if (deliveryVideoCheckbox) {
+        deliveryVideoCheckbox.addEventListener('change', updateTotal);
+    }
 
-    totalPriceElement.innerText = (total + shipping + videoFee).toFixed(2) + ' €';
-}
-
-function updateShippingCost() {
-    const selectedValue = parseFloat(citySelect.value) || 0;
-    shippingCostElement.innerText = selectedValue.toFixed(2);
-    updateTotal();
-}
-
-// Priskirti event'us
-quantityInputs.forEach(input => {
-    input.addEventListener('input', updateTotal);
-});
-
-if (deliveryVideoCheckbox) {
-    deliveryVideoCheckbox.addEventListener('change', updateTotal);
-}
-
-if (citySelect) {
-    citySelect.addEventListener('change', updateShippingCost);
-}
-
-document.addEventListener('DOMContentLoaded', () => {
-    updateShippingCost(); // įkelia pristatymo kainą
-    updateTotal(); // paskaičiuoja pradinę bendrą sumą
-});
-
+    if (citySelect) {
+        citySelect.addEventListener('change', updateShippingCost);
+    }
+    document.addEventListener('DOMContentLoaded', function () {
+        flatpickr("#delivery_date", {
+            dateFormat: "Y-m-d",
+            minDate: new Date().fp_incr(2),
+            disable: [
+                function(date) {
+                    return date.getDay() === 0; // Neleisti sekmadienių
+                }
+            ],
+            locale: {
+                firstDayOfWeek: 1
+            }
+        });
+    });
+    document.addEventListener('DOMContentLoaded', () => {
+        updateShippingCost();
+        updateTotal();
+    });
 </script>
-
 @endsection

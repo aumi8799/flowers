@@ -1,39 +1,39 @@
-// 'Rodyti daugiau' mygtuko veiksmas
-document.addEventListener('DOMContentLoaded', function() {
+document.addEventListener('DOMContentLoaded', function () {
     let currentPage = 1;
     const loadMoreButton = document.getElementById('load-more');
     const productList = document.getElementById('product-list');
+    const orderList = document.getElementById('order-list');
 
-    loadMoreButton.addEventListener('click', function() {
-        // Didiname puslapį ir siunčiame AJAX užklausą
+    if (!loadMoreButton) return;
+
+    loadMoreButton.addEventListener('click', function () {
         currentPage++;
-        loadMoreProducts(currentPage);
+        loadMoreItems(currentPage);
     });
 
-    function loadMoreProducts(page) {
-        const url = new URL(window.location.href); // Paimam esamą URL
-        url.searchParams.set('page', page); // Pridedam puslapio parametrą
+    function loadMoreItems(page) {
+        const url = new URL(window.location.href);
+        url.searchParams.set('page', page);
 
-        // Atlikti AJAX užklausą
         fetch(url)
             .then(response => response.text())
             .then(data => {
-                const newProducts = document.createElement('div');
-                newProducts.innerHTML = data;
+                const newContent = document.createElement('div');
+                newContent.innerHTML = data;
 
-                // Rasti naujai užkrautus produktus
-                const newProductItems = newProducts.querySelector('.product-list').children;
-                
-                // Įterpti naujus produktus
-                Array.from(newProductItems).forEach(item => {
-                    productList.appendChild(item);
-                });
+                const newProductItems = newContent.querySelector('.product-list')?.children || [];
+                const newOrderItems = newContent.querySelector('.order-list')?.children || [];
 
-                // Jei nėra daugiau produktų, paslėpti mygtuką
-                if (newProducts.querySelector('.product-item') === null) {
-                    loadMoreButton.style.display = 'none';
+                if (productList) {
+                    Array.from(newProductItems).forEach(item => productList.appendChild(item));
+                    if (newProductItems.length === 0) loadMoreButton.style.display = 'none';
+                }
+
+                if (orderList) {
+                    Array.from(newOrderItems).forEach(item => orderList.appendChild(item));
+                    if (newOrderItems.length === 0) loadMoreButton.style.display = 'none';
                 }
             })
-            .catch(error => console.error('Klaida užkraunant produktus:', error));
+            .catch(error => console.error('Klaida užkraunant daugiau duomenų:', error));
     }
 });

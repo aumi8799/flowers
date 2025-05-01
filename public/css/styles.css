@@ -11219,3 +11219,12 @@ textarea.form-control-lg {
   transform: translateY(-10px);
   transition: transform 0.3s ease-in-out;
 }
+.field-error {
+   border-color: red !important;
+}
+ .error-text {
+    color: red;
+    font-size: 0.875rem;
+    margin-top: 2px;
+}
+

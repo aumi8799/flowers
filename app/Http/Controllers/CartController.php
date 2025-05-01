@@ -3,65 +3,66 @@
 namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
+use Illuminate\Support\Str;
 
 class CartController extends Controller
 {
     public function addToCart(Request $request)
-    {
-        $cart = session()->get('cart', []);
-        
-        $productId = $request->id;
-        $name = $request->name;
-        $price = $request->price;
-        $quantity = $request->quantity; // Naudojame kiekių reikšmę iš užklausos
-        $image = $request->image;
-        
-        // Failo kintamasis pradžioje
-        $path_to_file = null;
+{
+    $cart = session()->get('cart', []);
 
-        // Jei buvo įkeltas failas (pvz. iš Canva)
-        if ($request->hasFile('postcard_file')) {
-            $file = $request->file('postcard_file');
-            $fileName = time() . '_' . $file->getClientOriginalName();
-            $file->move(public_path('uploads/postcards'), $fileName);
-            $path_to_file = 'uploads/postcards/' . $fileName;
-        }
+    $productId = $request->id;
+    $name = $request->name;
+    $price = $request->price;
+    $quantity = $request->quantity;
+    $image = $request->image;
 
+    $path_to_file = null;
 
-        if (isset($cart[$productId])) {
-            $cart[$productId]['quantity'] += $quantity; // Pridedame pasirinkta kiekį
-        } else {
-            $cart[$productId] = [
-                "name" => $name,
-                "price" => $price,
-                "quantity" => $quantity, 
-                "image" => $request->image,
-            ];
-        }
+    // Įkeliam failą (jei yra)
+    if ($request->hasFile('postcard_file')) {
+        $file = $request->file('postcard_file');
+        $fileName = time() . '_' . $file->getClientOriginalName();
+        $file->move(public_path('uploads/postcards'), $fileName);
+        $path_to_file = 'uploads/postcards/' . $fileName;
+    }
 
-        // Jei pridėtas atvirukas
-        if ($request->has('add_postcard') && $request->add_postcard == '1') {
-            $cart[$productId]['postcard'] = [
-                "method" => $request->postcard_method ?? 'simple',
-                "template" => $request->postcard_template,
-                "message" => $request->postcard_message,
-                "uploaded_file" => $path_to_file,
-            ];
-        }
-        
-        session()->put('cart', $cart);
-        
-        // Grąžinti atsakymą į front-end su Ajax
-        if ($request->ajax()) {
-            return response()->json([
-                'success' => true,
-                'message' => 'Prekė pridėta į krepšelį!',
-                'cartCount' => count($cart),
-            ]);
-        }
-        
-        return redirect()->back()->with('success', 'Prekė pridėta į krepšelį!');
-    }    
+    // Sukuriam unikalų įrašo raktą
+    $uniqueKey = Str::uuid()->toString();
+
+    // Sukuriam pagrindinį įrašą
+    $cart[$uniqueKey] = [
+        'id' => $productId,
+        'type' => 'product',
+        'name' => $name,
+        'price' => $price,
+        'quantity' => $quantity,
+        'image' => $image,
+    ];
+
+    // Jei pridėtas atvirukas
+    if ($request->has('add_postcard') && $request->add_postcard == '1') {
+        $cart[$uniqueKey]['postcard'] = [
+            'method' => $request->postcard_method ?? 'simple',
+            'template' => $request->postcard_template ?? null,
+            'message' => $request->postcard_message ?? '',
+            'uploaded_file' => $path_to_file,
+        ];
+    }
+
+    session()->put('cart', $cart);
+
+    if ($request->ajax()) {
+        return response()->json([
+            'success' => true,
+            'message' => 'Prekė pridėta į krepšelį!',
+            'cartCount' => count($cart),
+        ]);
+    }
+
+    return redirect()->back()->with('success', 'Prekė pridėta į krepšelį!');
+}
+
     public function addSubscriptionToCart(Request $request)
     {
         $request->validate([
@@ -113,17 +114,17 @@ class CartController extends Controller
     }
 
     // Pašalinti prekę iš krepšelio
-    public function removeFromCart($id)
-    {
-        $cart = session()->get('cart', []);
-
-        if (isset($cart[$id])) {
-            unset($cart[$id]);
-            session()->put('cart', $cart);
-        }
-
-        return redirect()->back()->with('success', 'Prekė pašalinta iš krepšelio.');
+    public function removeFromCart($key)
+{
+    $cart = session()->get('cart', []);
+    if (isset($cart[$key])) {
+        unset($cart[$key]);
+        session()->put('cart', $cart);
     }
+
+    return redirect()->back()->with('success', 'Prekė pašalinta iš krepšelio.');
+}
+
 
     // Ištuštinti krepšelį
     public function clearCart()

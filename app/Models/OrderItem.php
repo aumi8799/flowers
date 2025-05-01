@@ -17,5 +17,9 @@ class OrderItem extends Model
     {
         return $this->belongsTo(Product::class);
     }
-
+    public function postcard()
+    {
+        return $this->hasOne(\App\Models\Postcard::class);
+    }
+    
 }
