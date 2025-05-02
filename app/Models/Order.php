@@ -55,5 +55,10 @@ class Order extends Model
     {
         return $this->hasMany(\App\Models\CustomBouquet::class);
     }
+    public function giftCoupons()
+    {
+        return $this->hasMany(\App\Models\GiftCoupon::class);
+    }
     
+
 }

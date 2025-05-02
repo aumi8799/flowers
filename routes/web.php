@@ -48,6 +48,9 @@ Route::get('/giftcoupons', function () {
     return view('giftcoupons');
 })->name('giftcoupons');
 
+use App\Http\Controllers\GiftCouponController;
+Route::get('giftcoupons', [App\Http\Controllers\GiftCouponController::class, 'index'])->name('giftcoupons.index');
+Route::post('giftcoupons/purchase', [App\Http\Controllers\GiftCouponController::class, 'purchase'])->name('giftcoupons.purchase');
 use App\Http\Controllers\CartController;
 
 Route::post('/cart/add', [CartController::class, 'addToCart'])->name('cart.add');
@@ -56,6 +59,7 @@ Route::post('/cart/remove/{key}', [CartController::class, 'removeFromCart'])->na
 Route::post('/cart/clear', [CartController::class, 'clearCart'])->name('cart.clear');
 Route::post('/subscription/add', [CartController::class, 'addSubscriptionToCart'])->name('subscription.add');
 Route::post('/cart/remove-subscription', [CartController::class, 'removeSubscriptionFromCart'])->name('cart.remove.subscription');
+Route::post('/cart/apply-coupon', [App\Http\Controllers\CartController::class, 'applyCoupon'])->name('cart.apply_coupon');
 
 use App\Http\Controllers\CatalogController;
 Route::get('/catalog', [CatalogController::class, 'index'])->name('catalog.index');
@@ -141,6 +145,12 @@ Route::delete('/admin/users/{user}', [AdminController::class, 'destroyUser'])->n
 Route::get('/admin/orders/{order}', [AdminController::class, 'showOrder'])->name('admin.orders.show');
 Route::get('/admin/orders/{order}/edit', [AdminController::class, 'editOrder'])->name('admin.orders.edit');
 Route::put('/admin/orders/{order}', [AdminController::class, 'updateOrder'])->name('admin.orders.update');
+Route::get('/admin/coupons', [App\Http\Controllers\AdminController::class, 'coupons'])->name('admin.coupons.index');
+Route::get('/admin/coupons/create', [App\Http\Controllers\AdminController::class, 'createCoupon'])->name('admin.coupons.create');
+Route::post('/admin/coupons', [App\Http\Controllers\AdminController::class, 'storeCoupon'])->name('admin.coupons.store');
+Route::delete('/admin/coupons/{id}', [App\Http\Controllers\AdminController::class, 'destroy'])->name('admin.coupons.destroy');
+Route::get('/admin/coupons/{coupon}/edit', [AdminController::class, 'editCoupon'])->name('admin.coupons.edit');
+Route::put('/admin/coupons/{coupon}', [AdminController::class, 'updateCoupon'])->name('admin.coupons.update');
 
 Route::middleware(['auth', 'role:courier'])->group(function () {
     Route::get('/courier', [CourierController::class, 'index'])->name('courier.dashboard');

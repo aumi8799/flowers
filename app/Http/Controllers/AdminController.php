@@ -6,6 +6,7 @@ use Illuminate\Http\Request;
 use App\Models\User;
 use App\Models\Order;
 use App\Models\Review;
+use App\Models\GiftCoupon;
 
 class AdminController extends Controller
 {
@@ -22,8 +23,10 @@ class AdminController extends Controller
             $query->where('role', $request->role);
         }
     
-        $users = $query->withCount(['orders', 'reviews'])->orderBy('created_at', 'desc')->get();
-    
+        $users = $query->withCount(['orders', 'reviews'])
+        ->orderBy('created_at', 'desc')
+        ->paginate(5); // arba bet koks kiekis per puslapį
+        
         return view('admin.users', compact('users'));
     }
     
@@ -36,7 +39,7 @@ class AdminController extends Controller
             $query->where('status', $request->status);
         }
 
-        $orders = $query->paginate(10); // arba kiek nori
+        $orders = $query->paginate(5); // arba kiek nori
 
         return view('admin.orders', compact('orders'));
     }
@@ -51,7 +54,7 @@ class AdminController extends Controller
             $query->where('rating', $request->rating);
         }
 
-        $reviews = $query->paginate(10);
+        $reviews = $query->paginate(5);
 
         return view('admin.reviews', compact('reviews'));
     }
@@ -142,4 +145,64 @@ public function updateOrder(Request $request, Order $order)
 
     return redirect()->route('admin.orders')->with('success', 'Užsakymas atnaujintas sėkmingai.');
 }
+public function coupons(Request $request)
+{
+    $query = GiftCoupon::query();
+
+    if ($request->filled('used')) {
+        $query->where('used', $request->used);
+    }
+
+    $coupons = $query->orderByDesc('created_at')->paginate(5);
+
+    return view('admin.coupons.index', compact('coupons'));
+}
+
+
+public function createCoupon()
+{
+    return view('admin.coupons.create');
+}
+
+public function storeCoupon(Request $request)
+{
+    $request->validate([
+        'code' => 'required|string|unique:gift_coupons,code',
+        'value' => 'required|numeric|min:0.01',
+    ]);
+
+    GiftCoupon::create([
+        'code' => $request->code,
+        'value' => $request->value,
+    ]);
+
+    return redirect()->route('admin.coupons.index')->with('success', 'Kuponas sukurtas sėkmingai.');
+}
+public function destroy($id)
+{
+    $coupon = GiftCoupon::findOrFail($id);
+    $coupon->delete();
+
+    return redirect()->route('admin.coupons.index')->with('success', 'Kuponas ištrintas sėkmingai.');
+}
+
+public function editCoupon(GiftCoupon $coupon)
+{
+    return view('admin.coupons.edit', compact('coupon'));
+}
+
+public function updateCoupon(Request $request, GiftCoupon $coupon)
+{
+    $request->validate([
+        'code' => 'required|string|unique:gift_coupons,code,' . $coupon->id,
+        'value' => 'required|numeric|min:0.01',
+        'used' => 'required|in:0,1',
+
+    ]);
+
+    $coupon->update($request->only(['code', 'value', 'used']));
+
+    return redirect()->route('admin.coupons.index')->with('success', 'Kuponas atnaujintas sėkmingai.');
+}
+
 }

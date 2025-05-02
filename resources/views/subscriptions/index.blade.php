@@ -120,6 +120,10 @@
             </div>
             @endforeach
         </div>
+        <div class="mt-4 ">
+    {{ $subscriptions->appends(request()->query())->links() }}
+</div>
+
     @endif
 </div>
 

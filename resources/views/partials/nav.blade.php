@@ -37,7 +37,8 @@
                             @if($isAdmin)
                             <li><a class="dropdown-item-custom" href="/admin/users">Vartotojai</a></li>
                             <li><a class="dropdown-item-custom" href="/admin/orders">Užsakymų valdymas</a></li>
-                            <li><a class="dropdown-item-custom" href="/admin/reviews">Atsiliepimų valdymas</a></li>                           
+                            <li><a class="dropdown-item-custom" href="/admin/coupons">Dovanų kuponų valdymas</a></li>   
+                            <li><a class="dropdown-item-custom" href="/admin/reviews">Atsiliepimų valdymas</a></li>                          
                             @endif
                             @if(!$isCourier && !$isAdmin)
                                 <li><a class="dropdown-item-custom" href="/orders">Užsakymai</a></li>
@@ -111,7 +112,7 @@
                         <a class="nav-link" href="#">SPECIALŪS PASIŪLYMAI</a>
                         <ul class="dropdown-menu-custom">
                             <li><a class="dropdown-item-custom" href="/subscriptions">Puokščių Prenumerata</a></li>
-                            <li><a class="dropdown-item-custom" href="#">Dovanų Kuponai</a></li>
+                            <li><a class="dropdown-item-custom" href="/giftcoupons">Dovanų Kuponai</a></li>
                         </ul>
                     </li>
                     <li class="nav-item"><a class="nav-link" href="{{ route('decoration') }}">DEKORAVIMO PASLAUGOS</a></li>

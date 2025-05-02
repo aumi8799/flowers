@@ -116,6 +116,28 @@
                                     <td class="align-middle">{{ $subscriptionTotal }} €</td>
                                 </tr>
                             @endforeach
+                            {{-- Dovanų kuponai --}}
+@if($order->giftCoupons && $order->giftCoupons->count() > 0)
+    <tr>
+        <td colspan="5"><strong>Dovanų kuponai</strong></td>
+    </tr>
+    @foreach($order->giftCoupons as $coupon)
+        <tr>
+            <td>Dovanų kuponas</td>
+            <td>1</td>
+            <td>{{ number_format($coupon->value, 2) }} €</td>
+            <td>
+                <strong>Kodas:</strong> {{ $coupon->code }}<br>
+                <strong>Būsena:</strong>
+                @if($coupon->used)
+                    <span class="text-danger">Panaudotas</span>
+                @else
+                    <span class="text-success">Nepanaudotas</span>
+                @endif
+            </td>
+        </tr>
+    @endforeach
+@endif
 
                         </tbody>
                     </table>

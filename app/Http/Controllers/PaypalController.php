@@ -8,6 +8,10 @@ use App\Models\Order;
 use App\Models\OrderItem;
 use App\Mail\OrderPaidConfirmationMail;
 use Illuminate\Support\Facades\Mail;
+use App\Models\GiftCoupon;
+use Illuminate\Support\Str;
+use Barryvdh\DomPDF\Facade\Pdf;
+use Illuminate\Support\Facades\Storage;
 
 class PayPalController extends Controller
 {
@@ -74,6 +78,27 @@ class PayPalController extends Controller
                 \App\Models\CustomBouquet::where('id', $item['id'])->update([
                     'order_id' => $order->id,
                 ]);
+            } elseif ($item['type'] === 'giftcoupon') {
+                $coupon = GiftCoupon::create([
+                    'code' => strtoupper(Str::random(10)),
+                    'value' => $item['price'],
+                    'used' => false,
+                    'order_id' => $order->id,
+                ]);
+    
+                // 1. PDF generavimas
+                $pdf = Pdf::loadView('pdf.gift_coupon', compact('coupon'));
+    
+                // 2. Saugojimas
+                $pdfPath = 'giftcoupons/coupon_' . $coupon->code . '.pdf';
+                Storage::disk('public')->put($pdfPath, $pdf->output());
+    
+                // 3. Siuntimas el. paštu
+                Mail::raw("Dėkojame už įsigytą dovanų kuponą!", function ($message) use ($coupon, $pdfPath) {
+                    $message->to(Auth::user()->email)
+                            ->subject('Jūsų dovanų kuponas')
+                            ->attach(storage_path('app/public/' . $pdfPath));
+                });
             }
         }
     
@@ -103,6 +128,13 @@ class PayPalController extends Controller
                 ]);
             }
         }
+        if (session('gift_coupon_code')) {
+            $coupon = \App\Models\GiftCoupon::where('code', session('gift_coupon_code'))->first();
+            if ($coupon && !$coupon->used) {
+                $coupon->used = true;
+                $coupon->save();
+            }
+        }
         
         // Įkeliam user į order, kad nevežtų klaidos blade šablone
         $order->load('user');
@@ -114,7 +146,7 @@ class PayPalController extends Controller
         session()->forget([
             'cart', 'first_name', 'last_name', 'phone', 'email',
             'delivery_address', 'postal_code','delivery_date','delivery_time', 'delivery_city',
-            'notes', 'total_price', 'delivery_video'
+            'notes', 'total_price', 'delivery_video','gift_coupon_code', 'gift_coupon_discount'
         ]);
     
         return view('checkout_success');

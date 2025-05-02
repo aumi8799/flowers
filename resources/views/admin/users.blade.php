@@ -27,6 +27,9 @@
                 <a href="/admin/orders" class="list-group-item list-group-item-action">
                     <i class="fas fa-box-open me-2"></i> Užsakymų valdymas
                 </a>
+                <a href="/admin/coupons" class="list-group-item list-group-item-action logout-link" style="border-radius: 0;">
+                <i class="fas fa-gift me-2"></i> Dovanų kuponų valdymas
+                </a>
                 <a href="/admin/reviews" class="list-group-item list-group-item-action">
                     <i class="fas fa-comments me-2"></i> Atsiliepimų moderavimas
                 </a>
@@ -83,6 +86,10 @@
                 @empty
                 <div class="alert alert-info mb-0 text-center">Vartotojų nerasta.</div>
                 @endforelse
+                <div class="mt-4">
+                    {{ $users->appends(request()->query())->links() }}
+                </div>
+
             </div>
         </div>
     </div>

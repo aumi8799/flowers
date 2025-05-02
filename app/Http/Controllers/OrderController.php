@@ -43,7 +43,16 @@ class OrderController extends Controller
             \App\Models\CustomBouquet::where('id', $item['id'])->update([
                 'order_id' => $order->id,
             ]);
+        }elseif ($item['type'] === 'giftcoupon') {
+            \App\Models\GiftCoupon::create([
+                'order_id' => $order->id,
+                'value' => $item['price'],
+                'used' => false,
+                'code' => strtoupper(uniqid('GFT')),
+            ]);
         }
+        
+        
     
         // Jeigu turi atviruką – priskiriam šitam order_item
         if (isset($item['postcard'])) {
@@ -119,7 +128,8 @@ class OrderController extends Controller
             $query->where('status', $request->status);
         }
 
-        $orders = $query->orderByDesc('created_at')->get();
+        $orders = $query->orderByDesc('created_at')->paginate(5); // ✅
+
 
         return view('orders', compact('orders'));
     }

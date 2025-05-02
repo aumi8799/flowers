@@ -70,7 +70,27 @@
                                         </form>
                                     </td>
                                 </tr>
-                            @else
+                                @elseif(isset($item['type']) && $item['type'] === 'giftcoupon')
+                                    {{-- Dovanų kupono rodymas --}}
+                                    @php
+                                        $totalPrice += $item['price'];
+                                    @endphp
+                                    <tr>
+                                        <td><strong>Dovanų kuponas</strong></td>
+                                        <td></td>
+                                        <td>1</td>
+                                        <td>{{ number_format($item['price'], 2) }} €</td>
+                                        <td>–</td>
+                                        <td>
+                                            <form action="{{ route('cart.remove', $key) }}" method="POST">
+                                                @csrf
+                                                <button type="submit" style="background: none; border: none; padding: 0;">
+                                                    <img src="{{ asset('images/trash-icon.png') }}" alt="Ištrinti" style="width: 20px; height: 20px;">
+                                                </button>
+                                            </form>
+                                        </td>
+                                    </tr>
+                                @else
                                 @php
                                     $itemTotal = $item['price'] * $item['quantity'];
                                     $totalPrice += $itemTotal;
@@ -93,7 +113,6 @@
                                         @else
                                             <i class="fas fa-times-circle" style="color: gray; font-size: 1.5rem;"></i>
                                         @endif
-
                                     </td>
 
                                     <td class="align-middle">
@@ -107,7 +126,11 @@
                                 </tr>
                             @endif
                         @endforeach
-
+                        @php
+                                $discount = session('gift_coupon_discount', 0);
+                                $totalPrice -= $discount;
+                                if ($totalPrice < 0) $totalPrice = 0;
+                            @endphp
                         </tbody>
                     </table>
                 </div>
@@ -115,6 +138,21 @@
                 <div class="col-md-4">
                     <div class="border p-3 rounded">
                         <h4 style="font-weight: normal; font-size: 1.2rem;">Kaina už prekes: {{ $totalPrice }} €</h4>
+                        <form action="{{ route('cart.apply_coupon') }}" method="POST" class="mb-3">
+                            @csrf
+                            <label for="coupon_code" class="form-label">Turite dovanų kuponą?</label>
+                            <div class="input-group">
+                                <input type="text" name="coupon_code" id="coupon_code" class="form-control" placeholder="Įveskite kupono kodą" required>
+                                <button class="btn btn-outline-primary" type="submit">Panaudoti</button>
+                            </div>
+                            @if(session('coupon_error'))
+                                <div class="text-danger mt-2">{{ session('coupon_error') }}</div>
+                            @endif
+                            @if(session('coupon_success'))
+                                <div class="text-success mt-2">{{ session('coupon_success') }}</div>
+                            @endif
+                        </form>
+
                         <hr>
                         <h5 class="mb-3">Įveskite pirkėjo duomenis ir pristatymo adresą:</h5>
 
@@ -207,7 +245,11 @@
 
                         <hr>
                         <div style="text-align: right;">
-                            <h4 style="font-weight: normal; font-size: 1rem;">Viso: <span id="total-cost">{{ $totalPrice }}</span> €</h4>
+                           @if(session('gift_coupon_discount'))
+    <p>Nuolaida: -{{ session('gift_coupon_discount') }} € (kuponas)</p>
+@endif
+<h4 style="font-weight: normal; font-size: 1rem;">Viso: <span id="total-cost">{{ $totalPrice }}</span> €</h4>
+
                         </div>
 
                         <!-- Checkout button -->

@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
 use Illuminate\Support\Str;
+use App\Models\GiftCoupon;
 
 class CartController extends Controller
 {
@@ -132,5 +133,20 @@ class CartController extends Controller
         session()->forget('cart');
         return redirect()->back()->with('success', 'Krepšelis ištuštintas.');
     }
+
+    public function applyCoupon(Request $request)
+{
+    $code = $request->input('coupon_code');
+    $coupon = GiftCoupon::where('code', $code)->where('used', 0)->first();
+
+    if (!$coupon) {
+        return redirect()->back()->with('coupon_error', 'Kuponas nerastas arba jau panaudotas.');
+    }
+
+    session()->put('gift_coupon_code', $coupon->code);
+    session()->put('gift_coupon_discount', $coupon->value);
+
+    return redirect()->back()->with('coupon_success', 'Kuponas pritaikytas: -' . $coupon->value . ' €');
+}
 }
 

@@ -28,6 +28,9 @@
                 <a href="/admin/orders" class="list-group-item list-group-item-action logout-link" style="border-radius: 0;">
                 <i class="fas fa-box-open me-2"></i> Užsakymų valdymas
                 </a>
+                <a href="/admin/coupons" class="list-group-item list-group-item-action logout-link" style="border-radius: 0;">
+                <i class="fas fa-gift me-2"></i> Dovanų kuponų valdymas
+                </a>
                 <a href="/admin/reviews" class="list-group-item list-group-item-action logout-link" style="border-radius: 0;">
                 <i class="fas fa-comments me-2"></i> Atsiliepimų moderavimas
                 </a>
@@ -64,6 +67,17 @@
                                 <div class="card-body">
                                     <i class="fas fa-box-open fa-3x text-muted"></i>
                                     <h5 class="card-title mt-3">Užsakymų valdymas</h5>
+                                </div>
+                            </div>
+                        </a>
+                    </div>
+
+                    <div class="col-md-4">
+                        <a href="/admin/coupons" class="text-decoration-none text-dark">
+                            <div class="card text-center border" style="border-radius: 0;">
+                                <div class="card-body">
+                                    <i class="fas fa-gift fa-3x text-muted"></i>
+                                    <h5 class="card-title mt-3">Dovanų kuponų valdymas</h5>
                                 </div>
                             </div>
                         </a>

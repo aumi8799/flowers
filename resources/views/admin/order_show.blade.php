@@ -62,7 +62,7 @@
                 <th>Prekė</th>
                 <th>Kiekis</th>
                 <th>Kaina</th>
-                <th>Atvirukas</th>
+                <th>Detalės</th>
             </tr>
         </thead>
         <tbody>
@@ -124,6 +124,28 @@
                     <td><i class="fas fa-minus text-muted"></i></td>
                 </tr>
             @endforeach
+
+            {{-- Dovanų kuponai --}}
+            @if($order->giftCoupons && $order->giftCoupons->count() > 0)
+                @foreach($order->giftCoupons as $coupon)
+                    <tr>
+                    <td>Dovanų kuponas</td>
+                        <td>Dovanų kuponas</td>
+                        <td>1</td>
+                        <td>{{ number_format($coupon->value, 2) }} €</td>
+                        <td>
+                            <strong>Kodas:</strong> {{ $coupon->code }}<br>
+                            <strong>Būsena:</strong>
+                            @if($coupon->used)
+                                <span class="text-danger">Panaudotas</span>
+                            @else
+                                <span class="text-success">Nepanaudotas</span>
+                            @endif
+                        </td>
+                    </tr>
+                @endforeach
+            @endif
+
         </tbody>
     </table>
 </div>

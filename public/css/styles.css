@@ -11226,6 +11226,15 @@ textarea.form-control-lg {
 .ribbon.courier {
   background-color: #ffc107; /* Geltona */
 }
+.ribbon.panaudotas {
+  background: linear-gradient(45deg, #f44336, #e57373); /* Raudonas gradientas */
+  color: white;
+}
+.ribbon.nepanaudotas {
+  background: linear-gradient(45deg, #4caf50, #81c784); /* Žalia – dar galimas naudoti */
+  color: white;
+}
+
 .card:hover {
   transform: translateY(-10px);
   transition: transform 0.3s ease-in-out;
