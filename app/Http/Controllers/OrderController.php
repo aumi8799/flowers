@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
 use App\Models\Order;
+use App\Models\LoyaltyPoint;
 
 class OrderController extends Controller
 {
@@ -26,6 +27,26 @@ class OrderController extends Controller
     $order->delivery_time = $request->delivery_time;    
 
     $order->save();
+    // Lojalumo taškų pritaikymas (jei naudoti)
+    $usedPoints = session('loyalty_points_used', 0);
+    $discount = $usedPoints * 0.10;
+
+    // Įrašom kiek taškų buvo panaudota
+    $order->used_loyalty_points = $usedPoints;
+    $order->total_price = $order->total_price - $discount;
+    $order->save();
+
+    // Neigiamas įrašas – naudoto taškai
+    if ($usedPoints > 0) {
+        LoyaltyPoint::create([
+            'user_id' => auth()->id(),
+            'points' => -$usedPoints,
+            'description' => 'Naudota užsakymui #' . $order->id,
+        ]);
+    }
+
+    // Išvalom taškų sesiją
+    session()->forget(['loyalty_points_used', 'loyalty_discount']);
 
     $cart = session()->get('cart', []);
     foreach ($cart as $item) {
@@ -254,6 +275,7 @@ class OrderController extends Controller
         $order->save();
     
         return redirect()->route('orders.show', $order->id)->with('success', 'Užsakymas sėkmingai atnaujintas.');
+
     }
     
     
@@ -337,6 +359,5 @@ class OrderController extends Controller
         
             return view('orders.index', compact('orders'));
         }
-        
 
 }

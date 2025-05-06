@@ -78,4 +78,15 @@ class User extends Authenticatable
     {
         return $this->hasMany(Subscription::class);
     }
+
+    // Loyalty Points
+    public function loyaltyPoints()
+    {
+        return $this->hasMany(LoyaltyPoint::class);
+    }
+
+    public function getTotalPointsAttribute()
+    {
+        return $this->loyaltyPoints()->sum('points');
+    }
 }

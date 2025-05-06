@@ -185,3 +185,7 @@ use App\Http\Controllers\BouquetController;
 
 Route::get('/bouquet/create', [BouquetController::class, 'create'])->name('bouquet.create');
 Route::post('/bouquet/store', [BouquetController::class, 'store'])->name('bouquet.store');
+
+use App\Http\Controllers\LoyaltyController;
+
+Route::post('/loyalty/apply', [LoyaltyController::class, 'apply'])->name('loyalty.apply');

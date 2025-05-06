@@ -117,28 +117,41 @@
                                 </tr>
                             @endforeach
                             {{-- Dovanų kuponai --}}
-@if($order->giftCoupons && $order->giftCoupons->count() > 0)
-    <tr>
-        <td colspan="5"><strong>Dovanų kuponai</strong></td>
-    </tr>
-    @foreach($order->giftCoupons as $coupon)
-        <tr>
-            <td>Dovanų kuponas</td>
-            <td>1</td>
-            <td>{{ number_format($coupon->value, 2) }} €</td>
-            <td>
-                <strong>Kodas:</strong> {{ $coupon->code }}<br>
-                <strong>Būsena:</strong>
-                @if($coupon->used)
-                    <span class="text-danger">Panaudotas</span>
-                @else
-                    <span class="text-success">Nepanaudotas</span>
-                @endif
-            </td>
-        </tr>
-    @endforeach
-@endif
-
+                            @if($order->giftCoupons && $order->giftCoupons->count() > 0)
+                                <tr>
+                                    <td colspan="5"><strong>Dovanų kuponai</strong></td>
+                                </tr>
+                                @foreach($order->giftCoupons as $coupon)
+                                    <tr>
+                                        <td>Dovanų kuponas</td>
+                                        <td>1</td>
+                                        <td>{{ number_format($coupon->value, 2) }} €</td>
+                                        <td>
+                                            <strong>Kodas:</strong> {{ $coupon->code }}<br>
+                                            <strong>Būsena:</strong>
+                                            @if($coupon->used)
+                                                <span class="text-danger">Panaudotas</span>
+                                            @else
+                                                <span class="text-success">Nepanaudotas</span>
+                                            @endif
+                                        </td>
+                                    </tr>
+                                @endforeach
+                            @endif
+                            {{-- Dovanų kuponai --}}
+                            @if($order->used_loyalty_points > 0)
+                                <tr>
+                                    <td colspan="5"><strong>Lojalumo programa</strong></td>
+                                </tr>
+                                <tr>
+                                    <td>Panaudoti taškai</td>
+                                    <td>{{ $order->used_loyalty_points }}</td>
+                                    <td>-{{ number_format($order->used_loyalty_points * 0.10, 2) }} €</td>
+                                    <td colspan="2">
+                                        <span class="text-success">Sėkmingai pritaikyta nuolaida</span>
+                                    </td>
+                                </tr>
+                            @endif
                         </tbody>
                     </table>
                 </div>

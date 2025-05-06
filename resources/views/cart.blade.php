@@ -127,10 +127,16 @@
                             @endif
                         @endforeach
                         @php
-                                $discount = session('gift_coupon_discount', 0);
-                                $totalPrice -= $discount;
-                                if ($totalPrice < 0) $totalPrice = 0;
-                            @endphp
+                            $discount = session('gift_coupon_discount', 0);
+                            $totalPrice -= $discount;
+                            if ($totalPrice < 0) $totalPrice = 0;
+                        @endphp
+                        @php
+                            $loyaltyDiscount = session('loyalty_discount', 0);
+                            $totalPrice -= $loyaltyDiscount;
+                            if ($totalPrice < 0) $totalPrice = 0;
+                        @endphp
+
                         </tbody>
                     </table>
                 </div>
@@ -152,6 +158,27 @@
                                 <div class="text-success mt-2">{{ session('coupon_success') }}</div>
                             @endif
                         </form>
+                        <!-- Lojalumo taškų forma -->
+                        <form action="{{ route('loyalty.apply') }}" method="POST" class="mb-3">
+                            @csrf
+                            <label for="used_points" class="form-label">Norite pritaikyti lojalumo taškus?</label>
+                            <div class="input-group">
+                                <input type="number" name="used_points" id="used_points" class="form-control"
+                                    min="1" max="{{ auth()->user()->total_points }}"
+                                    value="{{ session('loyalty_points_used', 0) }}" required>
+                                <button class="btn btn-outline-success" type="submit">Panaudoti taškus</button>
+                            </div>
+                            <div class="form-text">
+                                Turite <strong>{{ auth()->user()->total_points }}</strong> taškų. 1 taškas = 0.10 € nuolaida.
+                            </div>
+                        </form>
+
+                        @if(session('loyalty_discount'))
+                            <div class="text-success">
+                                Taikyta lojalumo nuolaida: -{{ number_format(session('loyalty_discount'), 2) }} €
+                            </div>
+                        @endif
+                    
 
                         <hr>
                         <h5 class="mb-3">Įveskite pirkėjo duomenis ir pristatymo adresą:</h5>

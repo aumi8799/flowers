@@ -32,7 +32,23 @@ class PayPalController extends Controller
     
             $order->status = 'apmokėtas';
             $order->save();
-    
+
+            // Suteikiame lojalumo taškus, jei dar nepridėti
+            $earnedPoints = (int) $order->total_price;
+            $alreadyGiven = \App\Models\LoyaltyPoint::where('user_id', $order->user_id)
+                ->where('description', 'like', '%#' . $order->id . '%')
+                ->exists();
+
+            if (!$alreadyGiven) {
+                \App\Models\LoyaltyPoint::create([
+                    'user_id' => $order->user_id,
+                    'points' => $earnedPoints,
+                    'description' => 'Apmokėtas užsakymas #' . $order->id,
+                ]);
+
+                $order->user->increment('total_points', $earnedPoints);
+            }
+                
             // Patvirtinimo laiškas
             Mail::to(Auth::user()->email)->send(new OrderPaidConfirmationMail($order));
     
@@ -146,9 +162,22 @@ class PayPalController extends Controller
         session()->forget([
             'cart', 'first_name', 'last_name', 'phone', 'email',
             'delivery_address', 'postal_code','delivery_date','delivery_time', 'delivery_city',
-            'notes', 'total_price', 'delivery_video','gift_coupon_code', 'gift_coupon_discount'
+            'notes', 'total_price', 'delivery_video','gift_coupon_code', 'gift_coupon_discount',
+            'loyalty_points_used', 'loyalty_discount','user_points'
         ]);
-    
+
+        // Suteikiame lojalumo taškus po naujo apmokėjimo
+        $earnedPoints = (int) $order->total_price;
+        \App\Models\LoyaltyPoint::create([
+            'user_id' => $order->user_id,
+            'points' => $earnedPoints,
+            'description' => 'Apmokėtas užsakymas #' . $order->id,
+        ]);
+
+        $user = \App\Models\User::find($order->user_id);
+        $user->increment('total_points', $earnedPoints);
+
+
         return view('checkout_success');
     }
     
