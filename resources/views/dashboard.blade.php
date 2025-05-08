@@ -25,11 +25,11 @@
                     <a href="/orders" class="list-group-item list-group-item-action" style="border-radius: 0;">
                         <i class="far fa-clipboard-list"></i> Užsakymai
                     </a>
-                    <a href="#" class="list-group-item list-group-item-action" style="border-radius: 0;">
+                    <a href="{{ route('subscriptions.index') }}" class="list-group-item list-group-item-action" style="border-radius: 0;">
                         <i class="fas fa-download"></i> Prenumeratos
                     </a>
                     <a href="/addresses" class="list-group-item list-group-item-action" style="border-radius: 0;">
-                        <i class="far fa-map-marker-alt"></i> Adresai
+                        <i class="far fa-map-marker-alt"></i> Paskyros suvestinė
                     </a>
                     <a href="{{ route('profile.show') }}" class="list-group-item list-group-item-action" style="border-radius: 0;">
                         <i class="far fa-user"></i> Vartotojo informacija
@@ -66,7 +66,7 @@
                             <div class="card text-center border" style="border-radius: 0;">
                                 <div class="card-body">
                                     <i class="far fa-download fa-3x text-muted"></i>
-                                    <h5 class="card-title mt-3">Atsisiuntimai</h5>
+                                    <h5 class="card-title mt-3">Prenumeratos</h5>
                                 </div>
                             </div>
                         </a>
@@ -76,7 +76,7 @@
                             <div class="card text-center border" style="border-radius: 0;">
                                 <div class="card-body">
                                     <i class="far fa-map-marker-alt fa-3x text-muted"></i>
-                                    <h5 class="card-title mt-3">Adresai</h5>
+                                    <h5 class="card-title mt-3">Paskyros suvestinė</h5>
                                 </div>
                             </div>
                         </a>

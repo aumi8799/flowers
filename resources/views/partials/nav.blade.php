@@ -43,7 +43,7 @@
                             @if(!$isCourier && !$isAdmin)
                                 <li><a class="dropdown-item-custom" href="/orders">Užsakymai</a></li>
                                 <li><a class="dropdown-item-custom" href="{{ route('subscriptions.index') }}">Prenumeratos</a></li>
-                                <li><a class="dropdown-item-custom" href="/addresses">Adresai</a></li>
+                                <li><a class="dropdown-item-custom" href="/addresses">Paskyros suvestinė</a></li>
                                 <li><a class="dropdown-item-custom" href="{{ route('profile.show') }}">Vartotojo informacija</a></li>
                             @endif
                                 <li>

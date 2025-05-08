@@ -59,6 +59,19 @@ class Order extends Model
     {
         return $this->hasMany(\App\Models\GiftCoupon::class);
     }
-    
+    public function usedGiftCoupon()
+{
+    return \App\Models\GiftCoupon::where('used_in_order_id', $this->id)->first();
+}
+
+    public function loyaltyUsage()
+{
+    return $this->hasOne(LoyaltyPoint::class)->where('used_loyalty_points', '>', 0);
+}
+public function earnedLoyaltyPoints()
+{
+    return $this->hasOne(\App\Models\LoyaltyPoint::class, 'order_id')
+        ->where('points', '>', 0);
+}
 
 }

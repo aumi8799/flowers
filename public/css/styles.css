@@ -11247,4 +11247,33 @@ textarea.form-control-lg {
     font-size: 0.875rem;
     margin-top: 2px;
 }
-
+.star-active {
+  color: #ffc107;
+}
+.star-inactive {
+  color: #e4e5e9;
+}
+.rating-box h1 {
+  font-size: 3rem;
+  color: #343a40;
+}
+.bar-container {
+  width: 100%;
+  background-color: #f1f1f1;
+  height: 10px;
+  border-radius: 10px;
+  overflow: hidden;
+}
+.bar-container > div {
+  height: 100%;
+  background-color: #ffc107;
+}
+.review-card {
+  background-color: #f8f9fa;
+  border-radius: 1rem;
+  padding: 1.5rem;
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+}

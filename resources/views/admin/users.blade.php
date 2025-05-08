@@ -46,16 +46,22 @@
         <div class="col-md-9">
             <h2>Vartotojų sąrašas</h2>
 
-            <form method="GET" action="/admin/users" class="mb-4 d-flex align-items-end gap-3">
-                <label for="role">Filtruoti pagal rolę:</label>
-                <select name="role" id="role" onchange="this.form.submit()" class="form-select w-auto d-inline-block">
-                    <option value="">Visi</option>
-                    <option value="admin" {{ request('role') == 'admin' ? 'selected' : '' }}>Administratoriai</option>
-                    <option value="user" {{ request('role') == 'user' ? 'selected' : '' }}>Paprasti vartotojai</option>
-                    <option value="courier" {{ request('role') == 'courier' ? 'selected' : '' }}>Kurjeriai</option>
-                </select>
-            </form>
+            <div class="d-flex justify-content-between align-items-end mb-4">
+                <form method="GET" action="/admin/users" class="d-flex align-items-end gap-3">
+                    <label for="role">Filtruoti pagal rolę:</label>
+                    <select name="role" id="role" onchange="this.form.submit()" class="form-select w-auto d-inline-block">
+                        <option value="">Visi</option>
+                        <option value="admin" {{ request('role') == 'admin' ? 'selected' : '' }}>Administratoriai</option>
+                        <option value="user" {{ request('role') == 'user' ? 'selected' : '' }}>Paprasti vartotojai</option>
+                        <option value="courier" {{ request('role') == 'courier' ? 'selected' : '' }}>Kurjeriai</option>
+                    </select>
+                </form>
 
+                <a href="{{ route('admin.user_create') }}" class="btn btn-primary">
+                    <i class="fas fa-plus me-1"></i> Naujas vartotojas
+                 </a>
+            
+            </div>
             <div class="row">
                 @forelse($users as $user)
                     <div class="col-md-12 mb-4">

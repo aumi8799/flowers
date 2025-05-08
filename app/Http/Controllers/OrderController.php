@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use Illuminate\Http\Request;
 use App\Models\Order;
 use App\Models\LoyaltyPoint;
+use Carbon\Carbon;
 
 class OrderController extends Controller
 {
@@ -33,7 +34,6 @@ class OrderController extends Controller
 
     // Įrašom kiek taškų buvo panaudota
     $order->used_loyalty_points = $usedPoints;
-    $order->total_price = $order->total_price - $discount;
     $order->save();
 
     // Neigiamas įrašas – naudoto taškai
@@ -42,9 +42,18 @@ class OrderController extends Controller
             'user_id' => auth()->id(),
             'points' => -$usedPoints,
             'description' => 'Naudota užsakymui #' . $order->id,
+            'order_id' => $order->id,'used_loyalty_points' => 1,
         ]);
     }
-
+    if (session('gift_coupon_code')) {
+        $coupon = \App\Models\GiftCoupon::where('code', session('gift_coupon_code'))->first();
+        if ($coupon && !$coupon->used) {
+            $coupon->used = true;
+            $coupon->used_in_order_id = $order->id; // <- tik jei pridėjai šį lauką migracijoje
+            $coupon->save();
+        }
+    }
+    
     // Išvalom taškų sesiją
     session()->forget(['loyalty_points_used', 'loyalty_discount']);
 
@@ -88,8 +97,10 @@ class OrderController extends Controller
         }
     }
     
-    session()->forget('cart');
-
+    session()->forget([
+        'cart', 'gift_coupon_code', 'gift_coupon_discount'
+    ]);
+    
     return redirect()->route('orders.index')->with('success', 'Užsakymas rezervuotas!');
 }
 
@@ -168,16 +179,37 @@ class OrderController extends Controller
         if ($order->user_id !== auth()->id()) {
             abort(403, 'Negalite atšaukti šio užsakymo.');
         }
-
+    
         if ($order->status === 'atšauktas' || $order->status === 'pristatytas') {
             return redirect()->route('orders.index')->with('error', 'Šio užsakymo atšaukti nebegalima.');
         }
-
+    
+        // Atšaukiam užsakymą
         $order->status = 'atšauktas';
         $order->save();
+    
+        // GRĄŽINAM LOJALUMO TAŠKUS, jei buvo naudoti
+        $loyalty = \App\Models\LoyaltyPoint::where('order_id', $order->id)->where('points', '<', 0)->first();
+        if ($loyalty) {
+            $order->user->increment('total_points', abs($loyalty->points));
+            $loyalty->description = 'užsakymas atšauktas';
+            $loyalty->points = 0;
+            $loyalty->order_id = null;
+            $loyalty->save();
 
+        }
+    
+        // GRĄŽINAM DOVANŲ KUPONĄ, jei buvo naudotas
+        $usedCoupon = \App\Models\GiftCoupon::where('used', true)->where('used_in_order_id', $order->id)->first();
+        if ($usedCoupon) {
+            $usedCoupon->used = false;
+            $usedCoupon->used_in_order_id = null;
+            $usedCoupon->save();
+        }
+    
         return redirect()->route('orders.index')->with('success', 'Užsakymas sėkmingai atšauktas.');
     }
+    
 
     // Redaguoti užsakymą
     public function edit(Order $order)
@@ -277,28 +309,60 @@ class OrderController extends Controller
         return redirect()->route('orders.show', $order->id)->with('success', 'Užsakymas sėkmingai atnaujintas.');
 
     }
-    
-    
+
     public function courierTasks(Request $request)
     {
-        // Sukuriame užklausą, kuri grąžina visus užsakymus pagal sukūrimo datą
-        $query = Order::orderByDesc('created_at');
+        // Užklausos pradžia su rūšiavimu pagal datą ir laiką
+        $query = Order::orderBy('delivery_date')->orderBy('delivery_time');
     
-        // Jei statusas pasirinktas (ir nėra tuščias)
+        // Filtruojame pagal pasirinktą statusą arba rodom tik aktualius
         if ($request->filled('status')) {
-            // Filtruojame pagal pasirinktą statusą
             $query->where('status', $request->status);
         } else {
-            // Jei statusas tuščias (tai reiškia, kad pasirinkta "Visos užduotys")
             $query->whereIn('status', ['apmokėtas', 'pristatytas']);
         }
     
-        // Gauti užsakymus pagal filtrus
-        $orders = $query->get();
+        // Užklausos rezultatai
+        $ordersRaw = $query->get();
     
-        // Grąžinti užsakymus į peržiūros šabloną
-        return view('courier.tasks', compact('orders'));
+        // Apskaičiuojam ar kiekvienas užsakymas vėluoja
+        foreach ($ordersRaw as $order) {
+            $isLate = false;
+    
+            // Jei statusas "apmokėtas" ir data su laiku jau praeityje
+            if ($order->status === 'apmokėtas' && $order->delivery_date && $order->delivery_time) {
+                // Pabandome gauti laiko intervalą
+                $timeParts = explode(' - ', $order->delivery_time);
+                if (count($timeParts) === 2) {
+                    try {
+                        $endTime = Carbon::parse($order->delivery_date . ' ' . $timeParts[1]);
+                        $isLate = now()->greaterThan($endTime);
+                    } catch (\Exception $e) {
+                        $isLate = false;
+                    }
+                }
+            }
+    
+            $order->is_late = $isLate;
+        }
+    
+        // Grupavimas pagal datą
+        $orders = $ordersRaw->groupBy('delivery_date');
+    
+        // Suvestinės duomenys
+        $summary = [
+            'total' => $ordersRaw->count(),
+            'today' => $ordersRaw->where('delivery_date', Carbon::today()->toDateString())->count(),
+            'to_deliver' => $ordersRaw->where('status', 'apmokėtas')->count(),
+            'delivered' => $ordersRaw->where('status', 'pristatytas')->count(),
+            'late' => $ordersRaw->where('is_late', true)->count(),
+        ];
+    
+        // Grąžinam į vaizdą
+        return view('courier.tasks', compact('orders', 'summary'));
     }
+    
+    
 
         public function markAsDelivered($orderId)
         {

@@ -8,127 +8,173 @@
         <div class="text-center text-dark-gray">
             <h1 class="display-4 fw-bolder">Užsakymo #{{ $order->id }} detalės</h1>
             <a href="{{ route('orders.index') }}" class="lead fw-normal text-dark-gray mb-0 text-decoration-none" style="cursor: pointer;">
-            <i class="fas fa-arrow-left"></i> Grįžti į mano užsakymus </a>
-            </div>
+                <i class="fas fa-arrow-left"></i> Grįžti į mano užsakymus
+            </a>
+        </div>
     </div>
 </header>
 
-    <div class="container my-5">
-        @if(session('success'))
-            <div class="alert alert-success">{{ session('success') }}</div>
-        @endif
+<div class="container my-5">
+    @if(session('success'))
+        <div class="alert alert-success">{{ session('success') }}</div>
+    @endif
 
-        @if(empty($order))
-            <div class="text-center my-5">
-                <img src="{{ asset('images/order-empty.png') }}" alt="Tuščias užsakymas" class="img-fluid" style="max-width: 150px;">
-                <p class="mt-3">Nėra užsakymo #{{ $order->id }}informacijos</p>
-            </div>
-        @else
-            <div class="row">
-                <div class="col-md-8">
-                    <table class="table">
-                        <thead>
-                            <tr>
-                                <th>Prekė</th>
-                                <th></th>
-                                <th>Kiekis</th>   
-                                <th>Suma</th>
-                                <th>Atvirukas</th>
-                             
-
-                            </tr>
-                        </thead>
-                        <tbody>
-                            @php
-                                $totalPrice = 0;
-                            @endphp
-
-                            @foreach($order->items as $item)
-                                @php
-                                    $itemTotal = $item->price * $item->quantity;
-                                    $totalPrice += $itemTotal;
-                                @endphp
+    @if(empty($order))
+        <div class="text-center my-5">
+            <img src="{{ asset('images/order-empty.png') }}" alt="Tuščias užsakymas" class="img-fluid" style="max-width: 150px;">
+            <p class="mt-3">Nėra užsakymo #{{ $order->id }} informacijos</p>
+        </div>
+    @else
+    <div class="row">
+        <div class="col-md-8">
+            {{-- Produktai --}}
+            @if($order->items->count())
+                <h5 class="mt-4 text-primary">
+                    <i class="fas fa-shopping-basket me-2"></i> Produktai
+                </h5>
+                <div class="bg-light p-3 mb-4 rounded border border-primary shadow-sm">
+                    <div class="table-responsive">
+                        <table class="table table-hover align-middle">
+                            <thead class="table-primary">
                                 <tr>
-                                    <td>
-                                        <img src="{{ asset('images/products/' . $item->product->image) }}" alt="{{ $item->product->name }}" class="img-fluid" style="max-width: 80px; height: 80px;">
-                                    </td>
-                                    <td class="align-middle">{{ $item->product->name }}</td>
-                                    <td class="align-middle">{{ $item->quantity }}</td>
-                                    <td class="align-middle">{{ $itemTotal }} €</td>
-                                    <td class="align-middle">
-                                    @if($item->postcard)
-                                    <i class="fas fa-check-circle" style="color: green; font-size: 1.5rem;"></i>
-                                @else
-                                    <i class="fas fa-times-circle" style="color: gray; font-size: 1.5rem;"></i>
-                                @endif
-                            </td>
+                                    <th>Prekė</th>
+                                    <th>Pavadinimas</th>
+                                    <th>Kiekis</th>
+                                    <th>Suma</th>
+                                    <th>Atvirukas</th>
                                 </tr>
-                            @endforeach
-                            {{-- Individualios puokštės atvaizdavimas --}}
+                            </thead>
+                            <tbody>
+                                @php $totalPrice = 0; @endphp
+                                @foreach($order->items as $item)
+                                    @php
+                                        $itemTotal = $item->price * $item->quantity;
+                                        $totalPrice += $itemTotal;
+                                    @endphp
+                                    <tr>
+                                        <td>
+                                            <img src="{{ asset('images/products/' . ($item->product->image ?? 'default.png')) }}" class="img-fluid" style="max-width: 80px; height: 80px;">
+                                        </td>
+                                        <td class="align-middle">{{ $item->product->name ?? 'Be pavadinimo' }}</td>
+                                        <td class="align-middle">{{ $item->quantity }}</td>
+                                        <td class="align-middle">{{ number_format($itemTotal, 2) }} €</td>
+                                        <td class="align-middle">
+                                            @if($item->postcard)
+                                                <i class="fas fa-check-circle text-success fs-5"></i>
+                                            @else
+                                                <i class="fas fa-times-circle text-muted fs-5"></i>
+                                            @endif
+                                        </td>
+                                    </tr>
+                                @endforeach
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            @endif
+
+            {{-- Individualios puokštės --}}
+            @if($order->bouquets->count())
+                <h5 class="mt-4 text-warning">
+                    <i class="fas fa-seedling me-2"></i> Individualios puokštės
+                </h5>
+                <div class="bg-light p-3 mb-4 rounded border border-warning shadow-sm">
+                    <div class="table-responsive">
+                        <table class="table table-hover align-middle">
+                            <thead class="table-warning">
+                                <tr>
+                                    <th>Sudėtis</th>
+                                    <th>Kiekis</th>
+                                    <th>Suma</th>
+                                    <th>Atvirukas</th>
+                                </tr>
+                            </thead>
+                            <tbody>
                                 @foreach($order->bouquets as $bouquet)
                                     @php
                                         $bouquetItems = json_decode($bouquet->bouquet_data, true);
                                         $totalPrice += $bouquet->total_price;
                                     @endphp
                                     <tr>
-                                        <td>
-                                        <strong>Individuali puokštė</strong><br>
-                                        </td>
                                         <td class="align-middle">
                                             @foreach($bouquetItems as $flower)
                                                 - {{ $flower['name'] }} ({{ $flower['quantity'] }} vnt.)<br>
                                             @endforeach
                                         </td>
                                         <td class="align-middle">1</td>
-                                        <td class="align-middle">{{ $bouquet->total_price }} €</td>
+                                        <td class="align-middle">{{ number_format($bouquet->total_price, 2) }} €</td>
                                         <td class="align-middle">
-                                            @if($order->postcard)
-                                                <i class="fas fa-check-circle" style="color: green; font-size: 1.5rem;"></i>
+                                            @if($bouquet->postcard)
+                                                <i class="fas fa-check-circle text-success fs-5"></i>
                                             @else
-                                                <i class="fas fa-times-circle" style="color: gray; font-size: 1.5rem;"></i>
+                                                <i class="fas fa-times-circle text-muted fs-5"></i>
                                             @endif
                                         </td>
                                     </tr>
                                 @endforeach
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            @endif
 
-                            {{-- Prenumeratos atvaizdavimas tokiu pačiu stiliumi kaip krepšelyje --}}
-                            @foreach($order->subscriptions as $subscription)
-                                @php
-                                    $subscriptionTotal = $subscription->price;
-                                    $totalPrice += $subscriptionTotal;
+            {{-- Prenumeratos --}}
+            @if($order->subscriptions->count())
+                <h5 class="mt-4 text-info">
+                    <i class="fas fa-sync-alt me-2"></i> Prenumeratos
+                </h5>
+                <div class="bg-light p-3 mb-4 rounded border border-info shadow-sm">
+                    <div class="table-responsive">
+                        <table class="table table-hover align-middle">
+                            <thead class="table-info">
+                                <tr>
+                                    <th>Informacija</th>
+                                    <th>Kiekis</th>
+                                    <th>Kaina</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                @foreach($order->subscriptions as $subscription)
+                                    @php $totalPrice += $subscription->price; @endphp
+                                    <tr>
+                                        <td class="align-middle">
+                                            Kategorija: {{ ucfirst($subscription->category) }}<br>
+                                            Dydis: {{ $subscription->size }}<br>
+                                            Trukmė: {{ $subscription->duration }} mėn.
+                                        </td>
+                                        <td class="align-middle">1</td>
+                                        <td class="align-middle">{{ number_format($subscription->price, 2) }} €</td>
+                                    </tr>
+                                @endforeach
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            @endif
 
-                                    $startDate = $subscription->start_date ? new DateTime($subscription->start_date) : null;
-                                    $endDate = null;
-                                    if ($startDate) {
-                                        $endDate = clone $startDate;
-                                        $endDate->modify('+' . $subscription->duration . ' months');
-                                    }
-                                @endphp
+            {{-- Dovanų kuponai --}}
+            @if($order->giftCoupons && $order->giftCoupons->count() > 0)
+                <h5 class="mt-4 text-success">
+                    <i class="fas fa-gift me-2"></i> Dovanų kuponai
+                </h5>
+                <div class="bg-light p-3 mb-4 rounded border border-success shadow-sm">
+                    <div class="table-responsive">
+                        <table class="table table-hover align-middle">
+                            <thead class="table-success">
                                 <tr>
-                                    <td>
-                                    <strong>Gėlių prenumerata</strong><br>                                    </td>
-                                    <td class="align-middle">
-                                        <br>
-                                        Kategorija: {{ ucfirst($subscription->category) }}<br>
-                                        Dydis: {{ $subscription->size }}<br>
-                                    </td>
-                                    <td class="align-middle">1</td>
-                                    <td class="align-middle">{{ $subscriptionTotal }} €</td>
+                                    <th>Kodas</th>
+                                    <th>Kiekis</th>
+                                    <th>Vertė</th>
+                                    <th>Būsena</th>
                                 </tr>
-                            @endforeach
-                            {{-- Dovanų kuponai --}}
-                            @if($order->giftCoupons && $order->giftCoupons->count() > 0)
-                                <tr>
-                                    <td colspan="5"><strong>Dovanų kuponai</strong></td>
-                                </tr>
+                            </thead>
+                            <tbody>
                                 @foreach($order->giftCoupons as $coupon)
                                     <tr>
-                                        <td>Dovanų kuponas</td>
-                                        <td>1</td>
-                                        <td>{{ number_format($coupon->value, 2) }} €</td>
-                                        <td>
-                                            <strong>Kodas:</strong> {{ $coupon->code }}<br>
-                                            <strong>Būsena:</strong>
+                                        <td class="align-middle">{{ $coupon->code }}</td>
+                                        <td class="align-middle">1</td>
+                                        <td class="align-middle">{{ number_format($coupon->value, 2) }} €</td>
+                                        <td class="align-middle">
                                             @if($coupon->used)
                                                 <span class="text-danger">Panaudotas</span>
                                             @else
@@ -137,141 +183,126 @@
                                         </td>
                                     </tr>
                                 @endforeach
-                            @endif
-                            {{-- Dovanų kuponai --}}
-                            @if($order->used_loyalty_points > 0)
-                                <tr>
-                                    <td colspan="5"><strong>Lojalumo programa</strong></td>
-                                </tr>
-                                <tr>
-                                    <td>Panaudoti taškai</td>
-                                    <td>{{ $order->used_loyalty_points }}</td>
-                                    <td>-{{ number_format($order->used_loyalty_points * 0.10, 2) }} €</td>
-                                    <td colspan="2">
-                                        <span class="text-success">Sėkmingai pritaikyta nuolaida</span>
-                                    </td>
-                                </tr>
-                            @endif
-                        </tbody>
-                    </table>
-                </div>
-
-                <div class="col-md-4">
-    <div class="border p-3 rounded">
-        <h2>Užsakymo ID: #{{ $order->id }}</h2>
-        <hr>
-        <h5 style="font-weight: normal; font-size: 1rem;">Būsena:</h5>
-        <div class="mb-3">
-            <strong>{{ $order->status }}</strong>
-        </div>
-        @if ($order->cancel_reason)
-            <hr>
-            <h5 style="font-weight: normal; font-size: 1rem;">Priežastis:</h5>
-            <div class="mb-3">
-                <strong>{{ $order->cancel_reason }}</strong>
-            </div>
-        @endif
-        <hr>
-        @if($order->status === 'rezervuotas')
-            <h5 style="font-weight: normal; font-size: 1rem;">Rezervacijos laikas:</h5>
-            <div class="mb-3">
-                <strong>{{ $order->created_at->format('Y-m-d H:i:s') }}</strong>
-            </div>
-            <hr>
-        @endif
-
-        <!-- Pirkėjo duomenys -->
-        <h5 style="font-weight: normal; font-size: 1rem;">Pirkėjo informacija:</h5>
-        <div class="mb-3">
-            <strong>Vardas:</strong> {{ $order->first_name }}<br>
-            <strong>Pavardė:</strong> {{ $order->last_name }}<br>
-            <strong>Telefono numeris:</strong> {{ $order->phone }}<br>
-            <strong>El. paštas:</strong> {{ $order->email }}<br>
-        <hr>
-        <h5 style="font-weight: normal; font-size: 1rem;">Papildoma informacija:</h5>
-        <strong>Pastabos:</strong> {{ $order->notes ?? 'Nėra pastabų' }}<br>
-        @if($order->video == 1) 
-            <strong>Pristatymo vaizdo įrašas:</strong> Užsakytas (+5 eur)<br>
-        @else
-            <strong>Pristatymo vaizdo įrašas:</strong> Ne užsakytas<br>
-        @endif
-        @if($order->status === 'pristatytas' && $order->video == 1)
-                <hr>
-                <h5 style="font-weight: normal; font-size: 1rem;">Galite peržiūrėti arba atsisiųsti vaizdo įrašą:</h5>
-                <div class="mb-3">
-                    <div class="d-flex gap-1">
-                        <!-- Peržiūros nuoroda -->
-                        <a href="{{ asset('storage/' . $order->video_path) }}" class="btn btn-primary" target="_blank">
-                            <i class="fas fa-video"></i> Peržiūrėti vaizdo įrašą
-                        </a>
-                        <!-- Atsisiuntimo nuoroda -->
-                        <a href="{{ asset('storage/' . $order->video_path) }}" download class="btn btn-secondary">
-                            <i class="fas fa-download"></i> Atsisiųsti vaizdo įrašą
-                        </a>
+                            </tbody>
+                        </table>
                     </div>
                 </div>
-        @endif
-        <hr>
-        <h5 style="font-weight: normal; font-size: 1rem;">Pristatymo adresas:</h5>
-        <div class="mb-3">
-            <strong> Pristatymo miestas: 
-                @if($order->delivery_city == 7)
-                    Vilnius
-                @elseif($order->delivery_city == 10)
-                    Kaunas
-                @else
-                    Nenurodytas miestas
-                @endif
-            </strong><br>
-            <strong>Pristatymo adresas:</strong> {{ $order->delivery_address }}<br>
-            <strong>Pašto kodas:</strong> {{ $order->postal_code }}<br>
-        </div>
-        <hr>
-       
-<h5 style="font-weight: normal; font-size: 1rem;">Pristatymo data ir laikas:</h5>
-<div class="mb-3">
-    <strong>Data:</strong>
-    {{ $order->delivery_date ? \Carbon\Carbon::parse($order->delivery_date)->format('Y-m-d') : 'Nenurodyta' }}<br>
-    <strong>Laikas:</strong>
-    {{ $order->delivery_time ?? 'Nenurodytas' }}
-</div>
-<hr>
-        <div style="text-align: right;">
-            <h5 style="font-weight: normal; font-size: 1rem;">Pristatymo išlaidos: {{ $order->delivery_city }} €</h5>
-            <h5 style="font-weight: normal; font-size: 1rem;">Bendra suma: <span id="total-cost">{{ $order->total_price }}</span> €</h5>
-        </div>
-        <div class="d-flex justify-content-end gap-2 mt-4">
-            @if($order->status === 'rezervuotas')
-                <div class="d-flex justify-content-end gap-2 mt-4">
-
-                    <form action="{{ route('checkout.show') }}" method="GET">
-                        <input type="hidden" name="total" value="{{ $order->total_price }}">
-                        <input type="hidden" name="city" value="{{ $order->delivery_city }}">
-                        <input type="hidden" name="order_id" value="{{ $order->id }}">
-                        <button type="submit" class="btn btn-green">Apmokėti</button>
-                    </form>
-
-                    {{-- Redagavimo mygtukas --}}
-                    <form action="{{ route('orders.edit', $order->id) }}" method="GET">
-                        <button type="submit" class="btn btn-dark">Redaguoti</button>
-                    </form>
-
-                    {{-- Atšaukimo mygtukas --}}
-                    <form action="{{ route('orders.destroy', $order->id) }}" method="POST" onsubmit="return confirm('Ar tikrai norite atšaukti šį užsakymą?');">
-                        @csrf
-                        @method('DELETE')
-                        <button type="submit" class="btn btn-danger">Atšaukti rezervaciją</button>
-                    </form>
-                </div>
             @endif
-            @if($order->status === 'pristatytas' && !$order->review)
-                                <a href="{{ route('reviews.create', $order->id) }}" class="btn btn-sm btn-outline-primary mt-2">Rašyti atsiliepimą</a>
+        
+        </div>
+
+        {{-- Dešinysis stulpelis su užsakymo informacija --}}
+        <div class="col-md-4">
+            <div class="border p-3 rounded">
+                <h2>Užsakymo ID: #{{ $order->id }}</h2>
+                <hr>
+                <p><strong>Būsena:</strong> {{ $order->status }}</p>
+                @if ($order->cancel_reason)
+                    <p><strong>Priežastis:</strong> {{ $order->cancel_reason }}</p>
+                @endif
+
+                @if($order->status === 'rezervuotas')
+                    <hr>
+                    <p><strong>Rezervuotas:</strong> {{ $order->created_at->format('Y-m-d H:i:s') }}</p>
+                @endif
+
+                <hr>
+                <h5>Pirkėjo informacija</h5>
+                <p>
+                    <strong>{{ $order->first_name }} {{ $order->last_name }}</strong><br>
+                    Tel: {{ $order->phone }}<br>
+                    El. paštas: {{ $order->email }}
+                </p>
+
+                <hr>
+                <p><strong>Pastabos:</strong> {{ $order->notes ?? 'Nėra pastabų' }}</p>
+
+                @if($order->video == 1)
+                    <p><strong>Pristatymo vaizdo įrašas:</strong> Užsakytas (+5 €)</p>
+                    @if($order->status === 'pristatytas')
+                        <a href="{{ asset('storage/' . $order->video_path) }}" class="btn btn-outline-primary btn-sm" target="_blank">Peržiūrėti</a>
+                        <a href="{{ asset('storage/' . $order->video_path) }}" download class="btn btn-outline-secondary btn-sm">Atsisiųsti</a>
+                    @endif
+                @else
+                    <p><strong>Pristatymo vaizdo įrašas:</strong> Neužsakytas</p>
+                @endif
+
+                <hr>
+                <p>
+                    <strong>Miestas:</strong>
+                    @if($order->delivery_city == 7)
+                        Vilnius
+                    @elseif($order->delivery_city == 10)
+                        Kaunas
+                    @else
+                        Kitas
+                    @endif<br>
+                    <strong>Adresas:</strong> {{ $order->delivery_address }}<br>
+                    <strong>Pašto kodas:</strong> {{ $order->postal_code }}<br>
+                    <strong>Data:</strong> {{ \Carbon\Carbon::parse($order->delivery_date)->format('Y-m-d') }}<br>
+                    <strong>Laikas:</strong> {{ $order->delivery_time ?? 'Nenurodytas' }}
+                </p>
+
+                <hr>
+                <h5 class="text-end">Bendra suma: {{ number_format($order->total_price, 2) }} €</h5>
+                @if($order->earnedLoyaltyPoints || $order->loyaltyUsage || $order->usedGiftCoupon())
+                    <div class="mt-4 border-top pt-3">
+                        <h5 class="mb-3 text-info"><i class="fas fa-star me-2"></i> Lojalumo taškų ir kuponų suvestinė</h5>
+                        <ul class="list-group list-group-flush small">
+
+                            @if($order->loyaltyUsage)
+                                <li class="list-group-item d-flex justify-content-between">
+                                    <span>Panaudoti taškai</span>
+                                    <span class="text-danger">-{{ abs($order->loyaltyUsage->points) }} taškai (-{{ number_format(abs($order->loyaltyUsage->points) * 0.10, 2) }} €)</span>
+                                </li>
                             @endif
+
+                            @if($order->earnedLoyaltyPoints)
+                                <li class="list-group-item d-flex justify-content-between">
+                                    <span>Gauti taškai</span>
+                                    <span class="text-success">+{{ $order->earnedLoyaltyPoints->points }} taškai</span>
+                                </li>
+                            @endif
+
+                            @if($order->usedGiftCoupon())
+                                <li class="list-group-item d-flex justify-content-between">
+                                    <span>Naudotas kuponas</span>
+                                    <span class="text-danger">{{ $order->usedGiftCoupon()->code }} (-{{ number_format($order->usedGiftCoupon()->value, 2) }} €)</span>
+                                </li>
+                            @endif
+
+                        </ul>
+                    </div>
+                @endif
+
+                {{-- Veiksmai (Apmokėti, Redaguoti, Atšaukti, Atsiliepimas) --}}
+                <div class="d-flex flex-column gap-2 mt-3">
+                    @if($order->status === 'rezervuotas')
+                        <form action="{{ route('checkout.show') }}" method="GET">
+                            <input type="hidden" name="total" value="{{ $order->total_price }}">
+                            <input type="hidden" name="city" value="{{ $order->delivery_city }}">
+                            <input type="hidden" name="order_id" value="{{ $order->id }}">
+                            <button type="submit" class="btn btn-success w-100">Apmokėti</button>
+                        </form>
+
+                        <form action="{{ route('orders.edit', $order->id) }}" method="GET">
+                            <button type="submit" class="btn btn-dark w-100">Redaguoti</button>
+                        </form>
+
+                        <form action="{{ route('orders.destroy', $order->id) }}" method="POST" onsubmit="return confirm('Ar tikrai norite atšaukti šį užsakymą?');">
+                            @csrf
+                            @method('DELETE')
+                            <button type="submit" class="btn btn-danger w-100">Atšaukti rezervaciją</button>
+                        </form>
+                    @endif
+
+                    @if($order->status === 'pristatytas' && !$order->review)
+                        <a href="{{ route('reviews.create', $order->id) }}" class="btn btn-outline-primary">Rašyti atsiliepimą</a>
+                    @endif
+                </div>
+            </div>
         </div>
     </div>
+    @endif
 </div>
-
-            </div>
-        @endif
-    </div>
 @endsection

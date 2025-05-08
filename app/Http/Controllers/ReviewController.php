@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use Illuminate\Http\Request;
 use App\Models\Order;
 use App\Models\Review;
+use Illuminate\Support\Facades\DB;
 
 class ReviewController extends Controller
 {
@@ -40,10 +41,25 @@ public function store(Request $request, Order $order)
 
     return redirect()->route('orders.show', $order->id)->with('success', 'Atsiliepimas sėkmingai išsaugotas!');
 }
-public function showAll()
+public function showAll(Request $request)
 {
-    $reviews = Review::with('user')->latest()->get();
-    return view('reviews.show', compact('reviews'));
+    $rating = $request->query('rating');
+
+    // Užklausa su galimu filtru
+    $query = Review::with('user')->latest();
+    if ($rating) {
+        $query->where('rating', $rating);
+    }
+
+    $reviews = $query->paginate(6)->appends(['rating' => $rating]);
+
+    // Skaičiavimai su visais atsiliepimais (nefiltruotais)
+    $allReviews = Review::all();
+    $averageRating = round($allReviews->avg('rating'), 1);
+    $ratingCounts = $allReviews->groupBy('rating')->map->count();
+    $totalReviews = $allReviews->count();
+
+    return view('reviews.show', compact('reviews', 'averageRating', 'ratingCounts', 'totalReviews', 'rating'));
 }
 
 }

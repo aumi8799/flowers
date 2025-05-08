@@ -14,11 +14,14 @@
 
     <section class="py-5">
         <div class="container px-4 px-lg-5">
-            <h2 class="fw-bolder">Mūsų kontaktai</h2>
-            <p>Norėdami su mumis susisiekti, naudokitės žemiau pateikta informacija arba užpildykite kontaktinę formą.</p>
+            
 
             <div class="row">
                 <div class="col-md-6">
+
+                    <h2 class="fw-bolder">Mūsų kontaktai</h2>
+                    <p>Norėdami su mumis susisiekti, naudokitės žemiau pateikta informacija arba užpildykite kontaktinę formą.</p>
+                    
                     <h4>Adresas</h4>
                     <p>Didlaukio g. 47, Vilnius, Lietuva</p>
 
@@ -26,7 +29,7 @@
                     <p>+370 600 12345</p>
 
                     <h4>El. paštas</h4>
-                    <p>info@bloombliss.lt</p>
+                    <p>bloomandblissshoponline@gmail.com</p>
                 </div>
 
                 <div class="col-md-6">

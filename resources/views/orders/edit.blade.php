@@ -21,12 +21,19 @@
         @method('PUT')
 
         <div class="row">
-            <div class="col-md-8">
-                <table class="table">
-                    <thead>
+        <div class="col-md-8">
+    {{-- Produktai --}}
+    @if($order->items->count())
+        <h5 class="mt-4 text-primary">
+            <i class="fas fa-shopping-basket me-2"></i> Produktai
+        </h5>
+        <div class="bg-light p-3 mb-4 rounded border border-primary shadow-sm">
+            <div class="table-responsive">
+                <table class="table table-hover align-middle">
+                    <thead class="table-primary">
                         <tr>
                             <th>Prekė</th>
-                            <th></th>
+                            <th>Pavadinimas</th>
                             <th>Kiekis</th>
                             <th>Suma</th>
                         </tr>
@@ -41,32 +48,54 @@
                                 <td class="align-middle">
                                     <input type="number" name="quantities[{{ $item->id }}]" value="{{ $item->quantity }}" min="1" class="form-control quantity-input" data-price="{{ $item->price }}" style="width: 80px;">
                                 </td>
-                                <td class="align-middle item-total">{{ $item->price * $item->quantity }} €</td>
-                            </tr>
-                        @endforeach
-
-                        {{-- Individualios puokštės atvaizdavimas --}}
-                        @foreach($order->bouquets as $bouquet)
-                            @php
-                                $bouquetItems = json_decode($bouquet->bouquet_data, true);
-                            @endphp
-                            <tr>
-                                <td>
-                                    <img src="{{ asset('images/custom-bouquet.png') }}" alt="Puokštė" class="img-fluid" style="max-width: 80px; height: 80px;">
-                                </td>
-                                <td class="align-middle">
-                                    <strong>Individuali puokštė</strong><br>
-                                    @foreach($bouquetItems as $flower)
-                                        - {{ $flower['name'] }} ({{ $flower['quantity'] }} vnt.)<br>
-                                    @endforeach
-                                </td>
-                                <td class="align-middle">1</td>
-                                <td class="align-middle bouquet-total" data-price="{{ $bouquet->total_price }}">{{ number_format($bouquet->total_price, 2) }} €</td>
+                                <td class="align-middle item-total">{{ number_format($item->price * $item->quantity, 2) }} €</td>
                             </tr>
                         @endforeach
                     </tbody>
                 </table>
             </div>
+        </div>
+    @endif
+
+    {{-- Individualios puokštės --}}
+    @if($order->bouquets->count())
+        <h5 class="mt-4 text-warning">
+            <i class="fas fa-seedling me-2"></i> Individualios puokštės
+        </h5>
+        <div class="bg-light p-3 mb-4 rounded border border-warning shadow-sm">
+            <div class="table-responsive">
+                <table class="table table-hover align-middle">
+                    <thead class="table-warning">
+                        <tr>
+                            <th>Sudėtis</th>
+                            <th>Kiekis</th>
+                            <th>Suma</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @foreach($order->bouquets as $bouquet)
+                            @php
+                                $bouquetItems = json_decode($bouquet->bouquet_data, true);
+                            @endphp
+                            <tr>
+                                <td class="align-middle">
+                                    @foreach($bouquetItems as $flower)
+                                        - {{ $flower['name'] }} ({{ $flower['quantity'] }} vnt.)<br>
+                                    @endforeach
+                                </td>
+                                <td class="align-middle">1</td>
+                                <td class="align-middle bouquet-total" data-price="{{ $bouquet->total_price }}">
+                                    {{ number_format($bouquet->total_price, 2) }} €
+                                </td>
+                            </tr>
+                        @endforeach
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    @endif
+</div>
+
 
             <div class="col-md-4">
                 <div class="border p-3 rounded">

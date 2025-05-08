@@ -27,8 +27,8 @@
                 <a href="{{ route('subscriptions.index') }}" class="list-group-item list-group-item-action active" style="border-radius: 0;">
                     <i class="fas fa-download"></i> Prenumeratos
                 </a>
-                <a href="#" class="list-group-item list-group-item-action" style="border-radius: 0;">
-                    <i class="far fa-map-marker-alt"></i> Adresai
+                <a href="/addresses" class="list-group-item list-group-item-action" style="border-radius: 0;">
+                    <i class="far fa-map-marker-alt"></i> Paskyros suvestinė
                 </a>
                 <a href="{{ route('profile.show') }}" class="list-group-item list-group-item-action" style="border-radius: 0;">
                     <i class="far fa-user"></i> Vartotojo informacija

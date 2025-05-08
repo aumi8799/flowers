@@ -7,6 +7,7 @@ use App\Models\User;
 use App\Models\Order;
 use App\Models\Review;
 use App\Models\GiftCoupon;
+use Illuminate\Support\Facades\Hash;
 
 class AdminController extends Controller
 {
@@ -169,11 +170,13 @@ public function storeCoupon(Request $request)
     $request->validate([
         'code' => 'required|string|unique:gift_coupons,code',
         'value' => 'required|numeric|min:0.01',
+        'order_id' => 'nullable|integer|exists:orders,id',
     ]);
 
     GiftCoupon::create([
         'code' => $request->code,
         'value' => $request->value,
+        'order_id' => $request->order_id,
     ]);
 
     return redirect()->route('admin.coupons.index')->with('success', 'Kuponas sukurtas sėkmingai.');
@@ -197,12 +200,42 @@ public function updateCoupon(Request $request, GiftCoupon $coupon)
         'code' => 'required|string|unique:gift_coupons,code,' . $coupon->id,
         'value' => 'required|numeric|min:0.01',
         'used' => 'required|in:0,1',
-
+        'used_in_order_id' => 'nullable|integer|exists:orders,id',
+        'order_id' => 'nullable|integer|exists:orders,id',
     ]);
 
-    $coupon->update($request->only(['code', 'value', 'used']));
+    $coupon->update([
+        'code' => $request->code,
+        'value' => $request->value,
+        'used' => $request->used,
+        'used_in_order_id' => $request->used_in_order_id,
+        'order_id' => $request->order_id,
+    ]);
 
     return redirect()->route('admin.coupons.index')->with('success', 'Kuponas atnaujintas sėkmingai.');
 }
 
+public function createUser()
+{
+    return view('admin.user_create');
+}
+
+public function storeUser(Request $request)
+{
+    $request->validate([
+        'name' => 'required|string|max:255',
+        'email' => 'required|email|unique:users',
+        'password' => 'required|min:6',
+        'role' => 'required|in:user,admin,courier',
+    ]);
+
+    User::create([
+        'name' => $request->name,
+        'email' => $request->email,
+        'password' => Hash::make($request->password),
+        'role' => $request->role,
+    ]);
+
+    return redirect()->route('admin.users')->with('success', 'Vartotojas sėkmingai sukurtas!');
+}
 }

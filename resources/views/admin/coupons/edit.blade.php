@@ -35,6 +35,26 @@
             </select>
 
         </div>
+        <div class="mb-3">
+            <label for="used_in_order_id" class="form-label">Panaudota užsakymui (ID)</label>
+            <input type="number" name="used_in_order_id" id="used_in_order_id" class="form-control" value="{{ old('used_in_order_id', $coupon->used_in_order_id) }}">
+        </div>
+
+        <div class="mb-3">
+            <label for="order_id" class="form-label">Sukūrimo užsakymo ID</label>
+            <input type="number" name="order_id" id="order_id" class="form-control" value="{{ old('order_id', $coupon->order_id) }}">
+        </div>
+
+        <div class="mb-3">
+            <label for="created_at" class="form-label">Sukurtas</label>
+            <input type="text" id="created_at" class="form-control" value="{{ $coupon->created_at }}" readonly>
+        </div>
+
+        <div class="mb-3">
+            <label for="updated_at" class="form-label">Atnaujintas</label>
+            <input type="text" id="updated_at" class="form-control" value="{{ $coupon->updated_at }}" readonly>
+        </div>
+
         <div class="d-flex justify-content-between gap-2 mt-4">
             <a href="{{ route('admin.coupons.index') }}" class="btn btn-secondary">
                 <i class="fas fa-arrow-left me-2"></i> Grįžti

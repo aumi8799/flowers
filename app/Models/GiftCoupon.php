@@ -6,7 +6,7 @@ use Illuminate\Database\Eloquent\Model;
 
 class GiftCoupon extends Model
 {
-    protected $fillable = ['code', 'value', 'used', 'order_id'];
+    protected $fillable = ['code', 'value', 'used', 'order_id','used_in_order_id' ];
 
     public function order()
     {

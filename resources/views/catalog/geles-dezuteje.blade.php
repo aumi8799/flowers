@@ -44,8 +44,12 @@
         @endforeach
     </div>
 
-    <div class="text-center">
-        <button id="load-more" class="add-to-cart-btn">Rodyti daugiau</button>
-    </div>
+    <p class="text-muted text-center mt-4">
+    Rodoma {{ $products->firstItem() }}–{{ $products->lastItem() }} iš {{ $products->total() }} produktų
+</p>
+
+<div class="d-flex justify-content-center mt-3">
+    {{ $products->appends(request()->query())->links() }}
+</div>
 @endsection
 

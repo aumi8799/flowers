@@ -16,32 +16,35 @@
     @if(session('success'))
         <div class="alert alert-success">{{ session('success') }}</div>
     @endif
-
     <form method="POST" action="{{ route('admin.coupons.store') }}">
-        @csrf
+    @csrf
 
-        <div class="mb-3">
-            <label for="code" class="form-label">Kupono kodas</label>
-            <input type="text" name="code" id="code" class="form-control" value="{{ old('code') }}" required>
-            @error('code')
-                <div class="text-danger small">{{ $message }}</div>
-            @enderror
-        </div>
+    <div class="mb-3">
+        <label for="code" class="form-label">Kupono kodas</label>
+        <input type="text" name="code" id="code" class="form-control" value="{{ old('code') }}" required>
+        @error('code') <div class="text-danger small">{{ $message }}</div> @enderror
+    </div>
 
-        <div class="mb-3">
-            <label for="value" class="form-label">Vertė (€)</label>
-            <input type="number" name="value" id="value" class="form-control" step="0.01" value="{{ old('value') }}" required>
-            @error('value')
-                <div class="text-danger small">{{ $message }}</div>
-            @enderror
-        </div>
-        <div class="d-flex justify-content-between gap-2 mt-4">
+    <div class="mb-3">
+        <label for="value" class="form-label">Vertė (€)</label>
+        <input type="number" name="value" id="value" class="form-control" step="0.01" value="{{ old('value') }}" required>
+        @error('value') <div class="text-danger small">{{ $message }}</div> @enderror
+    </div>
 
+    <div class="mb-3">
+        <label for="order_id" class="form-label">Sukurtas pagal užsakymą (ID)</label>
+        <input type="number" name="order_id" id="order_id" class="form-control" value="{{ old('order_id') }}">
+        @error('order_id') <div class="text-danger small">{{ $message }}</div> @enderror
+    </div>
+
+    <div class="d-flex justify-content-between gap-2 mt-4">
         <a href="{{ route('admin.coupons.index') }}" class="btn btn-secondary">
-                <i class="fas fa-arrow-left me-2"></i> Grįžti
-            </a>
-        <button type="submit" class="btn btn-success"><i class="fas fa-plus me-2"></i>Sukurti kuponą</button>
-        </div>
-    </form>
+            <i class="fas fa-arrow-left me-2"></i> Grįžti
+        </a>
+        <button type="submit" class="btn btn-success">
+            <i class="fas fa-plus me-2"></i> Sukurti kuponą
+        </button>
+    </div>
+</form>
 </div>
 @endsection

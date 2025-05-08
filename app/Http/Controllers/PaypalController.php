@@ -12,6 +12,8 @@ use App\Models\GiftCoupon;
 use Illuminate\Support\Str;
 use Barryvdh\DomPDF\Facade\Pdf;
 use Illuminate\Support\Facades\Storage;
+use App\Models\LoyaltyPoint;
+use App\Services\InvoiceService;
 
 class PayPalController extends Controller
 {
@@ -19,51 +21,52 @@ class PayPalController extends Controller
     {
         $cart = session('cart', []);
         $orderId = $request->query('order_id');
-    
+
         if ($orderId) {
             $order = Order::where('id', $orderId)
                         ->where('user_id', Auth::id())
                         ->where('status', 'rezervuotas')
                         ->first();
-    
+
             if (!$order) {
                 return redirect('/')->with('error', 'Užsakymas nerastas arba negalima jo apmokėti.');
             }
-    
+
             $order->status = 'apmokėtas';
             $order->save();
 
-            // Suteikiame lojalumo taškus, jei dar nepridėti
             $earnedPoints = (int) $order->total_price;
-            $alreadyGiven = \App\Models\LoyaltyPoint::where('user_id', $order->user_id)
+            $alreadyGiven = LoyaltyPoint::where('user_id', $order->user_id)
                 ->where('description', 'like', '%#' . $order->id . '%')
                 ->exists();
 
             if (!$alreadyGiven) {
-                \App\Models\LoyaltyPoint::create([
+                LoyaltyPoint::create([
                     'user_id' => $order->user_id,
+                    'order_id' => $order->id,
                     'points' => $earnedPoints,
-                    'description' => 'Apmokėtas užsakymas #' . $order->id,
+                    'description' => 'Apmokėtas rezervuotas užsakymas #' . $order->id,
                 ]);
 
                 $order->user->increment('total_points', $earnedPoints);
             }
-                
-            // Patvirtinimo laiškas
-            Mail::to(Auth::user()->email)->send(new OrderPaidConfirmationMail($order));
-    
+
+            // Siunčiam faktūrą su PDF
+            $invoicePath = (new InvoiceService())->generateInvoicePdf($order);
+            Mail::to(Auth::user()->email)->send(new OrderPaidConfirmationMail($order, $invoicePath));
+
             return view('checkout_success');
         }
-    
+
         if (empty($cart)) {
             return redirect('/')->with('error', 'Krepšelis tuščias.');
         }
-    
+
         if (!Auth::check()) {
             return redirect('/login')->with('error', 'Norėdami pirkti, turite būti prisijungę.');
         }
-    
-        // Sukuriam naują užsakymą
+
+        // Naujo užsakymo kūrimas
         $order = new Order();
         $order->user_id = Auth::id();
         $order->status = 'apmokėtas';
@@ -80,11 +83,11 @@ class PayPalController extends Controller
         $order->total_price = session('total_price');
         $order->video = session('video');
         $order->save();
-    
-        // Pridedame produktus ir individualias puokštes
+
+        // Pridedami krepšelio elementai
         foreach ($cart as $item) {
             if (isset($item['type']) && $item['type'] === 'product') {
-                \App\Models\OrderItem::create([
+                OrderItem::create([
                     'order_id' => $order->id,
                     'product_id' => $item['id'],
                     'quantity' => $item['quantity'],
@@ -101,15 +104,11 @@ class PayPalController extends Controller
                     'used' => false,
                     'order_id' => $order->id,
                 ]);
-    
-                // 1. PDF generavimas
+
                 $pdf = Pdf::loadView('pdf.gift_coupon', compact('coupon'));
-    
-                // 2. Saugojimas
                 $pdfPath = 'giftcoupons/coupon_' . $coupon->code . '.pdf';
                 Storage::disk('public')->put($pdfPath, $pdf->output());
-    
-                // 3. Siuntimas el. paštu
+
                 Mail::raw("Dėkojame už įsigytą dovanų kuponą!", function ($message) use ($coupon, $pdfPath) {
                     $message->to(Auth::user()->email)
                             ->subject('Jūsų dovanų kuponas')
@@ -117,8 +116,7 @@ class PayPalController extends Controller
                 });
             }
         }
-    
-        // Sukuriame subscriptions (jei yra)
+
         foreach ($cart as $item) {
             if (isset($item['type']) && $item['type'] === 'subscription') {
                 \App\Models\Subscription::create([
@@ -133,6 +131,7 @@ class PayPalController extends Controller
                 ]);
             }
         }
+
         foreach ($cart as $item) {
             if (isset($item['postcard']) && !empty($item['postcard'])) {
                 \App\Models\Postcard::create([
@@ -144,20 +143,33 @@ class PayPalController extends Controller
                 ]);
             }
         }
+
         if (session('gift_coupon_code')) {
-            $coupon = \App\Models\GiftCoupon::where('code', session('gift_coupon_code'))->first();
+            $coupon = GiftCoupon::where('code', session('gift_coupon_code'))->first();
             if ($coupon && !$coupon->used) {
                 $coupon->used = true;
+                $coupon->used_in_order_id = $order->id;
                 $coupon->save();
             }
         }
-        
-        // Įkeliam user į order, kad nevežtų klaidos blade šablone
+
+        $usedPoints = session('loyalty_points_used', 0);
+        if ($usedPoints > 0) {
+            LoyaltyPoint::create([
+                'user_id' => $order->user_id,
+                'order_id' => $order->id,
+                'points' => -$usedPoints,
+                'description' => 'Naudota užsakymui #' . $order->id,
+                'used_loyalty_points' => 1,
+            ]);
+        }
+
         $order->load('user');
-    
-        // Siunčiam patvirtinimo laišką
-        Mail::to(Auth::user()->email)->send(new OrderPaidConfirmationMail($order));
-    
+
+        // Siunčiam patvirtinimo laišką su faktūra
+        $invoicePath = (new InvoiceService())->generateInvoicePdf($order);
+        Mail::to(Auth::user()->email)->send(new OrderPaidConfirmationMail($order, $invoicePath));
+
         // Išvalom sesiją
         session()->forget([
             'cart', 'first_name', 'last_name', 'phone', 'email',
@@ -166,10 +178,11 @@ class PayPalController extends Controller
             'loyalty_points_used', 'loyalty_discount','user_points'
         ]);
 
-        // Suteikiame lojalumo taškus po naujo apmokėjimo
+        // Lojalumo taškai
         $earnedPoints = (int) $order->total_price;
-        \App\Models\LoyaltyPoint::create([
+        LoyaltyPoint::create([
             'user_id' => $order->user_id,
+            'order_id' => $order->id,
             'points' => $earnedPoints,
             'description' => 'Apmokėtas užsakymas #' . $order->id,
         ]);
@@ -177,14 +190,11 @@ class PayPalController extends Controller
         $user = \App\Models\User::find($order->user_id);
         $user->increment('total_points', $earnedPoints);
 
-
         return view('checkout_success');
     }
-    
 
     public function cancel()
     {
         return redirect('/cart')->with('error', 'Mokėjimas atšauktas.');
     }
-
 }

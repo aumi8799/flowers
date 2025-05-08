@@ -60,6 +60,7 @@ Route::post('/cart/clear', [CartController::class, 'clearCart'])->name('cart.cle
 Route::post('/subscription/add', [CartController::class, 'addSubscriptionToCart'])->name('subscription.add');
 Route::post('/cart/remove-subscription', [CartController::class, 'removeSubscriptionFromCart'])->name('cart.remove.subscription');
 Route::post('/cart/apply-coupon', [App\Http\Controllers\CartController::class, 'applyCoupon'])->name('cart.apply_coupon');
+Route::post('/cart/remove-coupon', [CartController::class, 'removeCoupon'])->name('cart.remove_coupon');
 
 use App\Http\Controllers\CatalogController;
 Route::get('/catalog', [CatalogController::class, 'index'])->name('catalog.index');
@@ -90,9 +91,9 @@ Route::post('/order/process', [OrderController::class, 'processOrder'])->name('o
 Route::get('/orders', [OrderController::class, 'myOrders'])->name('orders.index');
 Route::get('/orders/{order}', [OrderController::class, 'show'])->name('orders.show');
 
-Route::get('/addresses', function () {
-    return view('addresses'); 
-});
+
+Route::get('/addresses', [App\Http\Controllers\ProfileController::class, 'summary'])->name('addresses');
+
 use App\Http\Controllers\SearchController;
 Route::get('/search', [SearchController::class, 'index'])->name('search');
 
@@ -140,6 +141,9 @@ Route::get('/admin/reviews/{review}/edit', [AdminController::class, 'editReview'
 Route::put('/admin/reviews/{review}', [AdminController::class, 'updateReview'])->name('admin.reviews.update');
 Route::delete('/admin/reviews/{review}', [AdminController::class, 'destroyReview'])->name('admin.reviews.destroy');
 Route::get('/admin/users/{user}/edit', [AdminController::class, 'editUser'])->name('admin.users.edit');
+Route::get('/admin/users/create', [AdminController::class, 'createUser'])->name('admin.user_create');
+Route::post('/admin/users', [AdminController::class, 'storeUser'])->name('admin.user_store');
+
 Route::put('/admin/users/{user}', [AdminController::class, 'updateUser'])->name('admin.users.update');
 Route::delete('/admin/users/{user}', [AdminController::class, 'destroyUser'])->name('admin.users.destroy');
 Route::get('/admin/orders/{order}', [AdminController::class, 'showOrder'])->name('admin.orders.show');

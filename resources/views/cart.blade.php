@@ -13,133 +13,175 @@
     </header>
 
     <div class="container my-5">
-        @if(session('success'))
-            <div class="alert alert-success">{{ session('success') }}</div>
-        @endif
+    @if(session('success'))
+        <div class="alert alert-success">{{ session('success') }}</div>
+    @endif
 
-        @php $totalPrice = 0; @endphp
+    @php 
+    $totalPrice = 0; 
+    @endphp
 
-        @if(empty($cart))
-            <div class="text-center my-5">
-                <img src="{{ asset('images/cart-empty.png') }}" alt="Tuščias krepšelis" class="img-fluid" style="max-width: 150px;">
-                <p class="mt-3">Krepšelyje nėra produktų</p>
-            </div>
-        @else
-            <div class="row">
-                <div class="col-md-8">
-                    <table class="table">
-                        <thead>
-                            <tr>
-                                <th>Prekė</th>
-                                <th></th>
-                                <th>Kiekis</th>
-                                <th>Suma</th>
-                                <th>Atvirukas</th>
-                                <th></th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            @php $totalPrice = 0; @endphp
+    @if(empty($cart))
+        <div class="text-center my-5">
+            <img src="{{ asset('images/cart-empty.png') }}" alt="Tuščias krepšelis" class="img-fluid" style="max-width: 150px;">
+            <p class="mt-3">Krepšelyje nėra produktų</p>
+        </div>
+    @else
+        <div class="row">
+            <div class="col-md-8">
 
-                            @foreach($cart as $key => $item)
-
-                            @if(isset($item['type']) && $item['type'] === 'subscription')
-                                @php
-                                    $itemTotal = $item['price'];
-                                    $totalPrice += $itemTotal;
-                                @endphp
-                                <tr>
-                                    <td>
-                                <strong>Gėlių prenumerata</strong><br>
-                                    </td>
-                                    <td class="align-middle">
-                                        <br>
-                                        Kategorija: {{ ucfirst($item['category']) }}<br>
-                                        Dydis: {{ $item['size'] }}<br>
-                                        Trukmė: {{ $item['duration'] }} mėn.
-                                    </td>
-                                    <td class="align-middle">1</td>
-                                    <td class="align-middle">{{ $itemTotal }} €</td>
-                                    <td class="align-middle"></td>
-                                    <td class="align-middle">
-                                        <form action="{{ route('cart.remove', $key) }}" method="POST" style="display: inline;">
-                                            @csrf
-                                            <button type="submit" style="background: none; border: none; padding: 0;">
-                                                <img src="{{ asset('images/trash-icon.png') }}" alt="Šiukšlių dėžė" style="width: 20px; height: 20px;">
-                                            </button>
-                                        </form>
-                                    </td>
-                                </tr>
-                                @elseif(isset($item['type']) && $item['type'] === 'giftcoupon')
-                                    {{-- Dovanų kupono rodymas --}}
-                                    @php
-                                        $totalPrice += $item['price'];
-                                    @endphp
+                @php $hasProducts = collect($cart)->filter(fn($item) => in_array($item['type'], ['product', 'custom_bouquet'])); @endphp
+                @if($hasProducts->isNotEmpty())
+                    <h5 class="mt-4 text-primary">
+                        <i class="fas fa-shopping-basket me-2"></i> Produktai
+                    </h5>
+                    <div class="bg-light p-3 mb-4 rounded border border-primary shadow-sm">
+                        <div class="table-responsive">
+                            <table class="table table-hover table-striped align-middle">
+                                <thead class="table-primary">
                                     <tr>
-                                        <td><strong>Dovanų kuponas</strong></td>
-                                        <td></td>
-                                        <td>1</td>
-                                        <td>{{ number_format($item['price'], 2) }} €</td>
-                                        <td>–</td>
-                                        <td>
-                                            <form action="{{ route('cart.remove', $key) }}" method="POST">
-                                                @csrf
-                                                <button type="submit" style="background: none; border: none; padding: 0;">
-                                                    <img src="{{ asset('images/trash-icon.png') }}" alt="Ištrinti" style="width: 20px; height: 20px;">
-                                                </button>
-                                            </form>
-                                        </td>
+                                        <th>Prekė</th>
+                                        <th>Pavadinimas</th>
+                                        <th>Kiekis</th>
+                                        <th>Suma</th>
+                                        <th>Atvirukas</th>
+                                        <th></th>
                                     </tr>
-                                @else
-                                @php
-                                    $itemTotal = $item['price'] * $item['quantity'];
-                                    $totalPrice += $itemTotal;
-                                @endphp
-                                <tr>
-                                <td>
-                                       @if (is_array($item) && array_key_exists('image', $item) && !empty($item['image']))
-                                            <img src="{{ asset('images/products/' . $item['image']) }}" alt="{{ $item['name'] }}" class="img-fluid" style="max-width: 80px; height: 80px;">
-                                        @else
-                                            <img src="{{ asset('images/default-bouquet.png') }}" alt="Individuali puokštė" class="img-fluid" style="max-width: 80px; height: 80px;">
+                                </thead>
+                                <tbody>
+                                    @foreach($cart as $key => $item)
+                                        @if(isset($item['type']) && in_array($item['type'], ['product', 'custom_bouquet']))
+                                            @php
+                                                $itemTotal = $item['price'] * $item['quantity'];
+                                                $totalPrice += $itemTotal;
+                                            @endphp
+                                            <tr>
+                                                <td>
+                                                    <img src="{{ asset('images/products/' . ($item['image'] ?? 'default-bouquet.png')) }}" alt="{{ $item['name'] ?? 'Individuali puokštė' }}" class="img-fluid" style="max-width: 80px; height: 80px;">
+                                                </td>
+                                                <td class="align-middle">
+                                                    {{ $item['name'] ?? 'Individuali puokštė' }}
+                                                </td>
+                                                <td class="align-middle">{{ $item['quantity'] }}</td>
+                                                <td class="align-middle">{{ number_format($itemTotal, 2) }} €</td>
+                                                <td class="align-middle">
+                                                    @if(isset($item['postcard']) && !empty($item['postcard']))
+                                                        <i class="fas fa-check-circle text-success fs-5"></i>
+                                                    @else
+                                                        <i class="fas fa-times-circle text-muted fs-5"></i>
+                                                    @endif
+                                                </td>
+                                                <td class="align-middle">
+                                                    <form action="{{ route('cart.remove', $key) }}" method="POST" style="display: inline;">
+                                                        @csrf
+                                                        <button type="submit" style="background: none; border: none; padding: 0;">
+                                                            <img src="{{ asset('images/trash-icon.png') }}" alt="Šiukšlių dėžė" style="width: 20px; height: 20px;">
+                                                        </button>
+                                                    </form>
+                                                </td>
+                                            </tr>
                                         @endif
+                                    @endforeach
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                @endif
 
-                                    </td>
-                                    <td class="align-middle">{{ $item['name'] }}</td>
-                                    <td class="align-middle">{{ $item['quantity'] }}</td>
-                                    <td class="align-middle">{{ $itemTotal }} €</td>
-                                    <td class="align-middle">
-                                        @if(isset($item['postcard']) && !empty($item['postcard']))
-                                            <i class="fas fa-check-circle" style="color: green; font-size: 1.5rem;"></i>
-                                        @else
-                                            <i class="fas fa-times-circle" style="color: gray; font-size: 1.5rem;"></i>
+                {{-- Prenumeratos --}}
+                @php $hasSubs = collect($cart)->where('type', 'subscription'); @endphp
+                @if($hasSubs->isNotEmpty())
+                    <h5 class="mt-4 text-info">
+                        <i class="fas fa-sync-alt me-2"></i> Prenumeratos
+                    </h5>
+                    <div class="bg-light p-3 mb-4 rounded border border-info shadow-sm">
+                        <div class="table-responsive">
+                            <table class="table table-hover table-striped align-middle">
+                                <thead class="table-info">
+                                    <tr>
+                                        <th>Tipas</th>
+                                        <th>Informacija</th>
+                                        <th>Kiekis</th>
+                                        <th>Kaina</th>
+                                        <th></th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    @foreach($cart as $key => $item)
+                                        @if(isset($item['type']) && $item['type'] === 'subscription')
+                                            @php $itemTotal = $item['price']; $totalPrice += $itemTotal; @endphp
+                                            <tr>
+                                                <td><strong>Gėlių prenumerata</strong></td>
+                                                <td class="align-middle">
+                                                    Kategorija: {{ ucfirst($item['category']) }}<br>
+                                                    Dydis: {{ $item['size'] }}<br>
+                                                    Trukmė: {{ $item['duration'] }} mėn.
+                                                </td>
+                                                <td class="align-middle">1</td>
+                                                <td class="align-middle">{{ $itemTotal }} €</td>
+                                                <td class="align-middle">
+                                                    <form action="{{ route('cart.remove', $key) }}" method="POST" style="display: inline;">
+                                                        @csrf
+                                                        <button type="submit" style="background: none; border: none; padding: 0;">
+                                                            <img src="{{ asset('images/trash-icon.png') }}" alt="Šiukšlių dėžė" style="width: 20px; height: 20px;">
+                                                        </button>
+                                                    </form>
+                                                </td>
+                                            </tr>
                                         @endif
-                                    </td>
+                                    @endforeach
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                @endif
 
-                                    <td class="align-middle">
-                                        <form action="{{ route('cart.remove', $key) }}" method="POST" style="display: inline;">
-                                            @csrf
-                                            <button type="submit" style="background: none; border: none; padding: 0;">
-                                                <img src="{{ asset('images/trash-icon.png') }}" alt="Šiukšlių dėžė" style="width: 20px; height: 20px;">
-                                            </button>
-                                        </form>
-                                    </td>
-                                </tr>
-                            @endif
-                        @endforeach
-                        @php
-                            $discount = session('gift_coupon_discount', 0);
-                            $totalPrice -= $discount;
-                            if ($totalPrice < 0) $totalPrice = 0;
-                        @endphp
-                        @php
-                            $loyaltyDiscount = session('loyalty_discount', 0);
-                            $totalPrice -= $loyaltyDiscount;
-                            if ($totalPrice < 0) $totalPrice = 0;
-                        @endphp
+                {{-- Dovanų kuponai --}}
+                @php $hasGifts = collect($cart)->where('type', 'giftcoupon'); @endphp
+                @if($hasGifts->isNotEmpty())
+                    <h5 class="mt-4 text-success">
+                        <i class="fas fa-gift me-2"></i> Dovanų kuponai
+                    </h5>
+                    <div class="bg-light p-3 mb-4 rounded border border-success shadow-sm">
+                        <div class="table-responsive">
+                            <table class="table table-hover table-striped align-middle">
+                                <thead class="table-success">
+                                    <tr>
+                                        <th>Pavadinimas</th>
+                                        <th></th>
+                                        <th>Kiekis</th>
+                                        <th>Kaina</th>
+                                        <th></th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    @foreach($cart as $key => $item)
+                                        @if(isset($item['type']) && $item['type'] === 'giftcoupon')
+                                            @php $totalPrice += $item['price']; @endphp
+                                            <tr>
+                                                <td><strong>Dovanų kuponas</strong></td>
+                                                <td></td>
+                                                <td>1</td>
+                                                <td>{{ number_format($item['price'], 2) }} €</td>
+                                                <td>
+                                                    <form action="{{ route('cart.remove', $key) }}" method="POST">
+                                                        @csrf
+                                                        <button type="submit" style="background: none; border: none; padding: 0;">
+                                                            <img src="{{ asset('images/trash-icon.png') }}" alt="Ištrinti" style="width: 20px; height: 20px;">
+                                                        </button>
+                                                    </form>
+                                                </td>
+                                            </tr>
+                                        @endif
+                                    @endforeach
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                @endif
 
-                        </tbody>
-                    </table>
-                </div>
+
+            </div>
 
                 <div class="col-md-4">
                     <div class="border p-3 rounded">
@@ -158,6 +200,14 @@
                                 <div class="text-success mt-2">{{ session('coupon_success') }}</div>
                             @endif
                         </form>
+                        @if(session('gift_coupon_discount'))
+                        <form action="{{ route('cart.remove_coupon') }}" method="POST" class="mt-2">
+                                @csrf
+                                <button type="submit" class="btn btn-sm btn-outline-danger">
+                                    Pašalinti kuponą ({{ session('gift_coupon_code') }})
+                                </button>
+                            </form>
+                        @endif
                         <!-- Lojalumo taškų forma -->
                         <form action="{{ route('loyalty.apply') }}" method="POST" class="mb-3">
                             @csrf
@@ -178,8 +228,6 @@
                                 Taikyta lojalumo nuolaida: -{{ number_format(session('loyalty_discount'), 2) }} €
                             </div>
                         @endif
-                    
-
                         <hr>
                         <h5 class="mb-3">Įveskite pirkėjo duomenis ir pristatymo adresą:</h5>
 
@@ -273,14 +321,19 @@
                         <hr>
                         <div style="text-align: right;">
                            @if(session('gift_coupon_discount'))
-    <p>Nuolaida: -{{ session('gift_coupon_discount') }} € (kuponas)</p>
-@endif
-<h4 style="font-weight: normal; font-size: 1rem;">Viso: <span id="total-cost">{{ $totalPrice }}</span> €</h4>
+                            <p>Nuolaida: -{{ session('gift_coupon_discount') }} € (kuponas)</p>
+                        @endif
 
+                        <h4 style="font-weight: normal; font-size: 1rem;">Viso: <span id="total-cost">{{ $totalPrice }}</span> €</h4>
                         </div>
 
                         <!-- Checkout button -->
-                        <a  href="#" class="btn btn-dark w-100 mt-4" onclick="return validateCheckout()" id="checkout-button" style="pointer-events: none; opacity: 0.5;">Tęsti atsiskaitymą</a>
+                        <a href="#" class="btn btn-dark w-100 mt-4"
+                        onclick="return handleCheckoutClick()"
+                        id="checkout-button"
+                        style="pointer-events: none; opacity: 0.5;">
+                        Tęsti atsiskaitymą
+                        </a>
 
                         <!-- Order reservation (prisijungusiems) -->
                         <div class="text-center">
@@ -309,8 +362,8 @@
                             </div>
 
                             <div id="subscription-warning" class="alert alert-danger mt-3" style="display: none;">
-                                Krepšelyje yra prenumerata. Prenumeratų rezervuoti negalima.<br>
-                                Pašalinkite prenumeratą, jei norite rezervuoti kitus produktus.
+                                    Krepšelyje yra <strong>prenumerata</strong> arba <strong>dovanų kuponas</strong>. Šių prekių rezervuoti negalima.<br>
+                                     Pašalinkite jas, jei norite rezervuoti kitus produktus.
                             </div>
                         @else
                             <p class="mt-3" style="font-size: 1.1rem;">
@@ -328,73 +381,90 @@
                     </div>
                 </div>
             </div>
-
-            @php
-    $hasSubscription = collect($cart)->contains(function ($item) {
-        return isset($item['type']) && $item['type'] === 'subscription';
-    });
-@endphp
+        @php
+            $hasSubscription= collect($cart)->contains(function ($item) {
+                return isset($item['type']) && in_array($item['type'], ['subscription', 'giftcoupon']);
+            });
+        @endphp
 
 <script>
-    let totalPrice = @json($totalPrice); 
+    let totalPrice = @json($totalPrice);
+    let couponDiscount = @json(session('gift_coupon_discount', 0));
+    let loyaltyDiscount = @json(session('loyalty_discount', 0));
     let cartHasSubscription = @json($hasSubscription);
 
     function updateShippingCost() {
-    const citySelect = document.getElementById('delivery-city-select');
-    const city = citySelect.value;
-    const firstName = document.getElementById('first-name').value;
-    const lastName = document.getElementById('last-name').value;
-    const phone = document.getElementById('phone').value;
-    const email = document.getElementById('email').value;
-    const deliveryAddress = document.getElementById('delivery_address').value;
-    const postalCode = document.getElementById('postal-code').value;
-    const deliveryDate = document.getElementById('delivery_date').value;
-    const deliveryTime = document.getElementById('delivery_time').value;
-    const notes = document.getElementById('notes').value;
+        const citySelect = document.getElementById('delivery-city-select');
+        const city = citySelect.value;
+        const firstName = document.getElementById('first-name').value;
+        const lastName = document.getElementById('last-name').value;
+        const phone = document.getElementById('phone').value;
+        const email = document.getElementById('email').value;
+        const deliveryAddress = document.getElementById('delivery_address').value;
+        const postalCode = document.getElementById('postal-code').value;
+        const deliveryDate = document.getElementById('delivery_date').value;
+        const deliveryTime = document.getElementById('delivery_time').value;
+        const notes = document.getElementById('notes').value;
 
-    const shippingCost = parseInt(city || 0);
-    const videoCheckbox = document.getElementById('delivery-video');
-    const videoCost = videoCheckbox && videoCheckbox.checked ? 5 : 0;
-    document.getElementById('hidden-video').value = videoCheckbox.checked ? 1 : 0;
+        const shippingCost = parseInt(city || 0);
+        const videoCheckbox = document.getElementById('delivery-video');
+        const videoCost = videoCheckbox && videoCheckbox.checked ? 5 : 0;
+        document.getElementById('hidden-video').value = videoCheckbox.checked ? 1 : 0;
 
-    const updatedTotal = totalPrice + shippingCost + videoCost;
+        // 1. Taikome kupono nuolaidą
+        let usedCoupon = Math.min(totalPrice, couponDiscount);
+        let remainingCoupon = couponDiscount - usedCoupon;
+        let priceAfterCoupon = totalPrice - usedCoupon;
 
-    document.getElementById('shipping-cost').textContent = shippingCost;
-    document.getElementById('total-cost').textContent = updatedTotal;
+        // 2. Taikome lojalumo nuolaidą nuo likusios sumos
+        let usedLoyalty = Math.min(priceAfterCoupon, loyaltyDiscount);
+        let priceAfterLoyalty = priceAfterCoupon - usedLoyalty;
 
-    document.getElementById('hidden-total-price').value = updatedTotal;
-    document.getElementById('delivery-city').value = city;
-    document.getElementById('hidden-first-name').value = firstName;
-    document.getElementById('hidden-last-name').value = lastName;
-    document.getElementById('hidden-phone').value = phone;
-    document.getElementById('hidden-email').value = email;
-    document.getElementById('hidden-delivery-address').value = deliveryAddress;
-    document.getElementById('hidden-postal-code').value = postalCode;
-    document.getElementById('hidden-delivery-date').value = deliveryDate;
-    document.getElementById('hidden-delivery-time').value = deliveryTime;
-    document.getElementById('hidden-notes').value = notes;
+        // 3. Pristatymo ir video išlaidų skaičiavimas
+        let extraCosts = shippingCost + videoCost;
 
-    const checkoutButton = document.getElementById('checkout-button');
-    checkoutButton.href = `/checkout?total=${updatedTotal}&city=${city}&first_name=${firstName}&last_name=${lastName}&phone=${phone}&email=${email}&delivery_address=${deliveryAddress}&postal_code=${postalCode}&delivery_date=${deliveryDate}&delivery_time=${deliveryTime}&notes=${notes}&delivery_video=${document.getElementById('hidden-video').value}`;
+        // 4. Jei dar liko kupono vertės, pritaikom ją papildomiems mokesčiams
+        let coveredExtras = Math.min(remainingCoupon, extraCosts);
+        let finalExtras = extraCosts - coveredExtras;
 
-    const allFieldsFilled = firstName && lastName && phone && email && deliveryAddress && postalCode && city && deliveryDate && deliveryTime;
+        // 5. Galutinė suma
+        const updatedTotal = priceAfterLoyalty + finalExtras;
 
-    checkoutButton.style.pointerEvents = allFieldsFilled ? 'auto' : 'none';
-    checkoutButton.style.opacity = allFieldsFilled ? '1' : '0.5';
+        document.getElementById('shipping-cost').textContent = shippingCost;
+        document.getElementById('total-cost').textContent = updatedTotal;
 
-    const reserveBtn = document.getElementById('reserve-order-btn');
-    if (reserveBtn) {
-        reserveBtn.disabled = cartHasSubscription;
+        document.getElementById('hidden-total-price').value = updatedTotal;
+        document.getElementById('delivery-city').value = city;
+        document.getElementById('hidden-first-name').value = firstName;
+        document.getElementById('hidden-last-name').value = lastName;
+        document.getElementById('hidden-phone').value = phone;
+        document.getElementById('hidden-email').value = email;
+        document.getElementById('hidden-delivery-address').value = deliveryAddress;
+        document.getElementById('hidden-postal-code').value = postalCode;
+        document.getElementById('hidden-delivery-date').value = deliveryDate;
+        document.getElementById('hidden-delivery-time').value = deliveryTime;
+        document.getElementById('hidden-notes').value = notes;
+
+        const checkoutButton = document.getElementById('checkout-button');
+        checkoutButton.href = `/checkout?total=${updatedTotal}&city=${city}&first_name=${firstName}&last_name=${lastName}&phone=${phone}&email=${email}&delivery_address=${deliveryAddress}&postal_code=${postalCode}&delivery_date=${deliveryDate}&delivery_time=${deliveryTime}&notes=${notes}&delivery_video=${document.getElementById('hidden-video').value}`;
+
+        const allFieldsFilled = firstName && lastName && phone && email && deliveryAddress && postalCode && city && deliveryDate && deliveryTime;
+
+        checkoutButton.style.pointerEvents = allFieldsFilled ? 'auto' : 'none';
+        checkoutButton.style.opacity = allFieldsFilled ? '1' : '0.5';
+
+        const reserveBtn = document.getElementById('reserve-order-btn');
+        if (reserveBtn) {
+            reserveBtn.disabled = cartHasSubscription;
+        }
+
+        const reservationSection = document.getElementById('reservation-section');
+        const subscriptionWarning = document.getElementById('subscription-warning');
+        if (reservationSection && subscriptionWarning) {
+            reservationSection.style.display = cartHasSubscription ? 'none' : 'block';
+            subscriptionWarning.style.display = cartHasSubscription ? 'block' : 'none';
+        }
     }
-
-    const reservationSection = document.getElementById('reservation-section');
-    const subscriptionWarning = document.getElementById('subscription-warning');
-    if (reservationSection && subscriptionWarning) {
-        reservationSection.style.display = cartHasSubscription ? 'none' : 'block';
-        subscriptionWarning.style.display = cartHasSubscription ? 'block' : 'none';
-    }
-}
-
 
     function validateCheckout() {
         const requiredFields = [
@@ -431,6 +501,23 @@
 
         return isValid;
     }
+    function handleCheckoutClick() {
+    if (!validateCheckout()) return false;
+
+    const total = parseFloat(document.getElementById('hidden-total-price').value || "0");
+
+    if (total <= 0) {
+        let redirectUrl = "{{ route('paypal.success') }}";
+        @if(isset($order_id))
+            redirectUrl += '?order_id={{ $order_id }}';
+        @endif
+        window.location.href = redirectUrl;
+        return false; // nesinaudojame <a href>
+    }
+
+    // Jei viskas gerai, leidžiam toliau naudoti esamą href
+    return true;
+}
 
     window.addEventListener('DOMContentLoaded', function () {
         updateShippingCost();
@@ -468,7 +555,6 @@
         });
     });
 </script>
-
 
       @endif
       </div>

@@ -27,7 +27,7 @@ class CatalogController extends Controller
         }
 
         // Puslapio parametras (pagal numatytuosius nustatymus 10 elementų per puslapį)
-        return $query->paginate(9);
+        return $query->paginate(10);
     }
 
     // Pagrindinis katalogo puslapis su filtravimu
@@ -70,17 +70,4 @@ class CatalogController extends Controller
         return view('catalog.miegancios-rozes', compact('products'));
     }
 
-    // AJAX užklausa, kad gauti papildomus produktus
-    public function loadMoreProducts(Request $request)
-    {
-        $category = $request->category; // Kategorija (pvz., 'miegancios_rozes')
-        $products = $this->filterByPrice($request, $category);
-
-        // Jei tai AJAX užklausa, grąžinsime tik produktų fragmentą
-        if ($request->ajax()) {
-            return view('catalog.products_fragment', compact('products'))->render();
-        }
-
-        return redirect()->route('catalog.miegancios-rozes');
-    }
 }

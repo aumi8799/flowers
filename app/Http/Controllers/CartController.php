@@ -148,5 +148,12 @@ class CartController extends Controller
 
     return redirect()->back()->with('coupon_success', 'Kuponas pritaikytas: -' . $coupon->value . ' €');
 }
+public function removeCoupon(Request $request)
+{
+    session()->forget('gift_coupon_discount');
+    session()->forget('gift_coupon_code');
+    return redirect()->back()->with('coupon_removed', 'Kuponas pašalintas.');
+}
+
 }
 

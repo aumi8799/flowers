@@ -12,7 +12,6 @@ class LoyaltyController extends Controller
     {
         $user = auth()->user();
         $usedPoints = (int) $request->input('used_points');
-
         // Validacija
         if ($usedPoints < 1 || $usedPoints > $user->total_points) {
             return redirect()->back()->with('coupon_error', 'Neteisingas taškų kiekis.');
@@ -24,14 +23,6 @@ class LoyaltyController extends Controller
         // Bendrų taškų kiekio sumažinimas
         $user->total_points -= $usedPoints;
         $user->save();
-
-        // Įrašom į loyalty_points lentelę
-        LoyaltyPoint::create([
-            'user_id' => $user->id,
-            'points' => -$usedPoints,
-            'description' => 'Naudoti atsiskaitymui',
-            'used_loyalty_points' => 1,
-        ]);
 
         // Įrašom į sesiją, kad nuolaida veiktų
         session([
