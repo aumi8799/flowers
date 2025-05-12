@@ -10,100 +10,99 @@ use Carbon\Carbon;
 class OrderController extends Controller
 {
     public function reserve(Request $request)
-{
-    $order = new Order();
-    $order->user_id = auth()->id(); 
-    $order->delivery_city = $request->delivery_city;
-    $order->delivery_address = $request->delivery_address;
-    $order->postal_code = $request->postal_code;
-    $order->first_name = $request->first_name;
-    $order->last_name = $request->last_name;
-    $order->phone = $request->phone;
-    $order->email = $request->email;
-    $order->notes = $request->notes;
-    $order->total_price = $request->total_price;
-    $order->status = 'rezervuotas'; 
-    $order->video = $request->delivery_video;
-    $order->delivery_date = $request->delivery_date;
-    $order->delivery_time = $request->delivery_time;    
+    {
+        $order = new Order();
+        $order->user_id = auth()->id(); 
+        $order->delivery_city = $request->delivery_city;
+        $order->delivery_address = $request->delivery_address;
+        $order->postal_code = $request->postal_code;
+        $order->first_name = $request->first_name;
+        $order->last_name = $request->last_name;
+        $order->phone = $request->phone;
+        $order->email = $request->email;
+        $order->notes = $request->notes;
+        $order->total_price = $request->total_price;
+        $order->status = 'rezervuotas'; 
+        $order->video = $request->delivery_video;
+        $order->delivery_date = $request->delivery_date;
+        $order->delivery_time = $request->delivery_time;    
 
-    $order->save();
-    // Lojalumo taškų pritaikymas (jei naudoti)
-    $usedPoints = session('loyalty_points_used', 0);
-    $discount = $usedPoints * 0.10;
+        $order->save();
 
-    // Įrašom kiek taškų buvo panaudota
-    $order->used_loyalty_points = $usedPoints;
-    $order->save();
+        $usedPoints = session('loyalty_points_used', 0);
+        $order->used_loyalty_points = $usedPoints;
+        $order->save();
 
-    // Neigiamas įrašas – naudoto taškai
-    if ($usedPoints > 0) {
-        LoyaltyPoint::create([
-            'user_id' => auth()->id(),
-            'points' => -$usedPoints,
-            'description' => 'Naudota užsakymui #' . $order->id,
-            'order_id' => $order->id,'used_loyalty_points' => 1,
+        if ($usedPoints > 0) {
+            LoyaltyPoint::create([
+                'user_id' => auth()->id(),
+                'points' => -$usedPoints,
+                'description' => 'Naudota užsakymui #' . $order->id,
+                'order_id' => $order->id,
+                'used_loyalty_points' => 1,
+            ]);
+        }
+
+        if (session('gift_coupon_code')) {
+            $coupon = \App\Models\GiftCoupon::where('code', session('gift_coupon_code'))->first();
+            if ($coupon && !$coupon->used) {
+                $coupon->used = true;
+                $coupon->used_in_order_id = $order->id;
+                $coupon->save();
+            }
+        }
+
+        session()->forget(['loyalty_points_used', 'loyalty_discount']);
+
+        $cart = session()->get('cart', []);
+        foreach ($cart as $item) {
+            $orderItem = null;
+
+            if ($item['type'] === 'product') {
+                $orderItem = \App\Models\OrderItem::create([
+                    'order_id' => $order->id,
+                    'product_id' => $item['id'],
+                    'quantity' => $item['quantity'],
+                    'price' => $item['price'],
+                ]);
+            } elseif ($item['type'] === 'custom_bouquet') {
+                $orderItem = \App\Models\OrderItem::create([
+                    'order_id' => $order->id,
+                    'custom_bouquet_id' => $item['id'],
+                    'quantity' => $item['quantity'] ?? 1,
+                    'price' => $item['price'],
+                ]);
+
+                \App\Models\CustomBouquet::where('id', $item['id'])->update([
+                    'order_id' => $order->id,
+                ]);
+            } elseif ($item['type'] === 'giftcoupon') {
+                \App\Models\GiftCoupon::create([
+                    'order_id' => $order->id,
+                    'value' => $item['price'],
+                    'used' => false,
+                    'code' => strtoupper(uniqid('GFT')),
+                ]);
+            }
+
+            if (isset($item['postcard'])) {
+                \App\Models\Postcard::create([
+                    'order_id' => $order->id,
+                    'order_item_id' => $orderItem?->id,
+                    'method' => $item['postcard']['method'] ?? null,
+                    'template' => $item['postcard']['template'] ?? null,
+                    'message' => $item['postcard']['message'] ?? null,
+                    'file_path' => $item['postcard']['file_path'] ?? null,
+                ]);
+            }
+        }
+
+        session()->forget([
+            'cart', 'gift_coupon_code', 'gift_coupon_discount'
         ]);
-    }
-    if (session('gift_coupon_code')) {
-        $coupon = \App\Models\GiftCoupon::where('code', session('gift_coupon_code'))->first();
-        if ($coupon && !$coupon->used) {
-            $coupon->used = true;
-            $coupon->used_in_order_id = $order->id; // <- tik jei pridėjai šį lauką migracijoje
-            $coupon->save();
-        }
-    }
-    
-    // Išvalom taškų sesiją
-    session()->forget(['loyalty_points_used', 'loyalty_discount']);
 
-    $cart = session()->get('cart', []);
-    foreach ($cart as $item) {
-        $orderItem = null;
-    
-        if ($item['type'] === 'product') {
-            $orderItem = \App\Models\OrderItem::create([
-                'order_id' => $order->id,
-                'product_id' => $item['id'],
-                'quantity' => $item['quantity'],
-                'price' => $item['price'],
-            ]);
-        } elseif ($item['type'] === 'custom_bouquet') {
-            // Priskiriam order_id prie puokštės
-            \App\Models\CustomBouquet::where('id', $item['id'])->update([
-                'order_id' => $order->id,
-            ]);
-        }elseif ($item['type'] === 'giftcoupon') {
-            \App\Models\GiftCoupon::create([
-                'order_id' => $order->id,
-                'value' => $item['price'],
-                'used' => false,
-                'code' => strtoupper(uniqid('GFT')),
-            ]);
-        }
-        
-        
-    
-        // Jeigu turi atviruką – priskiriam šitam order_item
-        if (isset($item['postcard'])) {
-            \App\Models\Postcard::create([
-                'order_id' => $order->id,
-                'order_item_id' => $orderItem?->id,
-                'method' => $item['postcard']['method'],
-                'template' => $item['postcard']['template'] ?? null,
-                'message' => $item['postcard']['message'] ?? null,
-                'file_path' => $item['postcard']['uploaded_file'] ?? null,
-            ]);
-        }
+        return redirect()->route('orders.index')->with('success', 'Užsakymas rezervuotas!');
     }
-    
-    session()->forget([
-        'cart', 'gift_coupon_code', 'gift_coupon_discount'
-    ]);
-    
-    return redirect()->route('orders.index')->with('success', 'Užsakymas rezervuotas!');
-}
-
     
     public function processOrder(Request $request)
     {
@@ -322,16 +321,14 @@ class OrderController extends Controller
             $query->whereIn('status', ['apmokėtas', 'pristatytas']);
         }
     
-        // Užklausos rezultatai
-        $ordersRaw = $query->get();
+        // Paginuojame rezultatus (pvz., po 10 užsakymų)
+        $ordersRaw = $query->paginate(6);
     
         // Apskaičiuojam ar kiekvienas užsakymas vėluoja
         foreach ($ordersRaw as $order) {
             $isLate = false;
     
-            // Jei statusas "apmokėtas" ir data su laiku jau praeityje
             if ($order->status === 'apmokėtas' && $order->delivery_date && $order->delivery_time) {
-                // Pabandome gauti laiko intervalą
                 $timeParts = explode(' - ', $order->delivery_time);
                 if (count($timeParts) === 2) {
                     try {
@@ -347,23 +344,20 @@ class OrderController extends Controller
         }
     
         // Grupavimas pagal datą
-        $orders = $ordersRaw->groupBy('delivery_date');
+        $orders = $ordersRaw->getCollection()->groupBy('delivery_date');
     
         // Suvestinės duomenys
         $summary = [
-            'total' => $ordersRaw->count(),
-            'today' => $ordersRaw->where('delivery_date', Carbon::today()->toDateString())->count(),
-            'to_deliver' => $ordersRaw->where('status', 'apmokėtas')->count(),
-            'delivered' => $ordersRaw->where('status', 'pristatytas')->count(),
-            'late' => $ordersRaw->where('is_late', true)->count(),
+            'total' => $ordersRaw->total(),
+            'today' => $ordersRaw->filter(fn($o) => $o->delivery_date === Carbon::today()->toDateString())->count(),
+            'to_deliver' => $ordersRaw->filter(fn($o) => $o->status === 'apmokėtas')->count(),
+            'delivered' => $ordersRaw->filter(fn($o) => $o->status === 'pristatytas')->count(),
+            'late' => $ordersRaw->filter(fn($o) => $o->is_late)->count(),
         ];
     
-        // Grąžinam į vaizdą
-        return view('courier.tasks', compact('orders', 'summary'));
+        return view('courier.tasks', compact('orders', 'ordersRaw', 'summary'));
     }
     
-    
-
         public function markAsDelivered($orderId)
         {
             $order = \App\Models\Order::findOrFail($orderId);

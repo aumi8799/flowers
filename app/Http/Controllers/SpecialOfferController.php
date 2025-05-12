@@ -7,23 +7,6 @@ use App\Models\SpecialOffer;
 
 class SpecialOfferController extends Controller
 {
-    /*public function apply(Request $request)
-    {
-        
-        $code = strtoupper(trim($request->discount_code));
-        $validCodes = [
-            'PAVASARIS10' => 0.10,
-            'MOTINA20' => 0.20,
-        ];
-
-        if (array_key_exists($code, $validCodes)) {
-            session()->put('special_discount_code', $code);
-            session()->put('special_discount_value', $validCodes[$code]);
-            return back()->with('discount_code_success', 'Nuolaidos kodas pritaikytas!');
-        }
-
-        return back()->with('discount_code_error', 'Neteisingas nuolaidos kodas.');
-    }*/
     public function apply(Request $request)
     {
         $code = strtoupper(trim($request->discount_code));

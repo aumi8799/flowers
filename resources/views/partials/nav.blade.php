@@ -38,7 +38,8 @@
                             <li><a class="dropdown-item-custom" href="/admin/users">Vartotojai</a></li>
                             <li><a class="dropdown-item-custom" href="/admin/orders">Užsakymų valdymas</a></li>
                             <li><a class="dropdown-item-custom" href="/admin/coupons">Dovanų kuponų valdymas</a></li>   
-                            <li><a class="dropdown-item-custom" href="/admin/reviews">Atsiliepimų valdymas</a></li>                          
+                            <li><a class="dropdown-item-custom" href="/admin/reviews">Atsiliepimų valdymas</a></li>      
+                            <li><a class="dropdown-item-custom" href="/admin/special_offers">Akcijų valdymas</a></li>                  
                             @endif
                             @if(!$isCourier && !$isAdmin)
                                 <li><a class="dropdown-item-custom" href="/orders">Užsakymai</a></li>

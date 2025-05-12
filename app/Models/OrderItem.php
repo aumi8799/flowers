@@ -10,7 +10,7 @@ class OrderItem extends Model
     use HasFactory;
 
     protected $fillable = [
-        'order_id', 'product_id', 'quantity', 'price'
+        'order_id', 'product_id', 'custom_bouquet_id', 'quantity', 'price'
     ];
 
     public function product()
@@ -21,5 +21,9 @@ class OrderItem extends Model
     {
         return $this->hasOne(\App\Models\Postcard::class);
     }
-    
+    public function customBouquet()
+{
+    return $this->belongsTo(\App\Models\CustomBouquet::class);
+}
+
 }

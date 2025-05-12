@@ -34,6 +34,9 @@
                 <a href="/admin/reviews" class="list-group-item list-group-item-action">
                     <i class="fas fa-comments me-2"></i> Atsiliepimų moderavimas
                 </a>
+                <a href="/admin/special_offers" class="list-group-item list-group-item-action logout-link" style="border-radius: 0;">
+                    <i class="fas fa-tags me-2"></i> Akcijų valdymas
+                </a>
                 <a href="#" class="list-group-item list-group-item-action logout-link" onclick="event.preventDefault(); document.getElementById('logout-form').submit();">
                     <i class="fas fa-sign-out-alt me-2"></i> Atsijungti
                 </a>
@@ -117,7 +120,9 @@
                         </div>
                     @endforeach
                 </div>
-
+                <p class="text-muted text-center mt-4">
+                    Rodoma {{ $orders->firstItem() }}–{{ $orders->lastItem() }} iš {{ $orders->total() }} atsiliepimų
+                </p>  
                 <!-- Puslapiavimas -->
                 <div class="mt-4">
                     {{ $orders->appends(request()->query())->links() }}

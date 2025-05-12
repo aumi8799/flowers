@@ -85,37 +85,60 @@ class PayPalController extends Controller
         $order->save();
 
         // Pridedami krepšelio elementai
-        foreach ($cart as $item) {
-            if (isset($item['type']) && $item['type'] === 'product') {
-                OrderItem::create([
-                    'order_id' => $order->id,
-                    'product_id' => $item['id'],
-                    'quantity' => $item['quantity'],
-                    'price' => $item['price'],
-                ]);
-            } elseif (isset($item['type']) && $item['type'] === 'custom_bouquet') {
-                \App\Models\CustomBouquet::where('id', $item['id'])->update([
-                    'order_id' => $order->id,
-                ]);
-            } elseif ($item['type'] === 'giftcoupon') {
-                $coupon = GiftCoupon::create([
-                    'code' => strtoupper(Str::random(10)),
-                    'value' => $item['price'],
-                    'used' => false,
-                    'order_id' => $order->id,
-                ]);
+  // Pridedami krepšelio elementai
+foreach ($cart as $item) {
+    $orderItem = null;
 
-                $pdf = Pdf::loadView('pdf.gift_coupon', compact('coupon'));
-                $pdfPath = 'giftcoupons/coupon_' . $coupon->code . '.pdf';
-                Storage::disk('public')->put($pdfPath, $pdf->output());
+    if (isset($item['type']) && $item['type'] === 'product') {
+        $orderItem = \App\Models\OrderItem::create([
+            'order_id' => $order->id,
+            'product_id' => $item['id'],
+            'quantity' => $item['quantity'],
+            'price' => $item['price'],
+        ]);
+    } elseif ($item['type'] === 'custom_bouquet') {
+        $orderItem = \App\Models\OrderItem::create([
+            'order_id' => $order->id,
+            'custom_bouquet_id' => $item['id'],
+            'quantity' => $item['quantity'] ?? 1,
+            'price' => $item['price'],
+        ]);
 
-                Mail::raw("Dėkojame už įsigytą dovanų kuponą!", function ($message) use ($coupon, $pdfPath) {
-                    $message->to(Auth::user()->email)
-                            ->subject('Jūsų dovanų kuponas')
-                            ->attach(storage_path('app/public/' . $pdfPath));
-                });
-            }
-        }
+        \App\Models\CustomBouquet::where('id', $item['id'])->update([
+            'order_id' => $order->id,
+        ]);
+    } elseif ($item['type'] === 'giftcoupon') {
+        $coupon = GiftCoupon::create([
+            'code' => strtoupper(Str::random(10)),
+            'value' => $item['price'],
+            'used' => false,
+            'order_id' => $order->id,
+        ]);
+
+        $pdf = Pdf::loadView('pdf.gift_coupon', compact('coupon'));
+        $pdfPath = 'giftcoupons/coupon_' . $coupon->code . '.pdf';
+        Storage::disk('public')->put($pdfPath, $pdf->output());
+
+        Mail::raw("Dėkojame už įsigytą dovanų kuponą!", function ($message) use ($coupon, $pdfPath) {
+            $message->to(Auth::user()->email)
+                    ->subject('Jūsų dovanų kuponas')
+                    ->attach(storage_path('app/public/' . $pdfPath));
+        });
+    }
+
+    // Jei yra atvirukas, priskiriam prie šio orderItem
+    if (isset($item['postcard']) && $orderItem) {
+        \App\Models\Postcard::create([
+            'order_id' => $order->id,
+            'order_item_id' => $orderItem->id,
+            'template' => $item['postcard']['template'] ?? 'numatytas',
+            'message' => $item['postcard']['message'] ?? '',
+            'method' => $item['postcard']['method'] ?? null,
+            'file_path' => $item['postcard']['file_path'] ?? null,
+        ]);
+    }
+}
+
 
         foreach ($cart as $item) {
             if (isset($item['type']) && $item['type'] === 'subscription') {

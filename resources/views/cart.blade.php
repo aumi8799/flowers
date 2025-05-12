@@ -215,29 +215,28 @@
                                 </button>
                             </form>
                         @endif
-                        <!-- Lojalumo taškų forma -->
-                        @auth
-                            <form action="{{ route('loyalty.apply') }}" method="POST" class="mb-3">
-                                @csrf
-                                <label for="used_points" class="form-label">Norite pritaikyti lojalumo taškus?</label>
-                                <div class="input-group">
-                                    <input type="number" name="used_points" id="used_points" class="form-control"
-                                        min="1" max="{{ auth()->user()->total_points }}"
-                                        value="{{ session('loyalty_points_used', 0) }}" required>
-                                    <button class="btn btn-outline-success" type="submit">Panaudoti taškus</button>
-                                </div>
-                                <div class="form-text">
-                                    Turite <strong>{{ auth()->user()->total_points }}</strong> taškų. 1 taškas = 0.10 € nuolaida.
-                                </div>
-                            </form>
-                        @endauth
+<!-- Lojalumo taškų forma -->
+@auth
+    <form action="{{ route('loyalty.apply') }}" method="POST" class="mb-3">
+        @csrf
+        <label for="used_points" class="form-label">Norite pritaikyti lojalumo taškus?</label>
+        <div class="input-group">
+            <input type="number" name="used_points" id="used_points" class="form-control"
+                min="1" max="{{ auth()->user()->total_points }}"
+                value="{{ session('loyalty_points_used', 0) }}" required>
+            <button class="btn btn-outline-success" type="submit">Panaudoti taškus</button>
+        </div>
+        <div class="form-text">
+            Turite <strong>{{ auth()->user()->total_points }}</strong> taškų. 1 taškas = 0.10 € nuolaida.
+        </div>
+    </form>
+@endauth
 
-                        @guest
-                            <p class="mt-3">
-                                Lojalumo taškus gali naudoti tik <a href="{{ route('login') }}" class="text-success">prisijungę</a> vartotojai.
-                            </p>
-                        @endguest
-
+@guest
+    <p class="mt-3">
+        Lojalumo taškus gali naudoti tik <a href="{{ route('login') }}" class="text-success">prisijungę</a> vartotojai.
+    </p>
+@endguest
 
                         @if(session('loyalty_discount'))
                             <div class="text-success">

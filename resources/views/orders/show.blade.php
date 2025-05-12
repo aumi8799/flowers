@@ -18,7 +18,11 @@
     @if(session('success'))
         <div class="alert alert-success">{{ session('success') }}</div>
     @endif
-
+    
+    @php
+        $totalPrice = 0;
+    @endphp
+    
     @if(empty($order))
         <div class="text-center my-5">
             <img src="{{ asset('images/order-empty.png') }}" alt="Tuščias užsakymas" class="img-fluid" style="max-width: 150px;">
@@ -28,96 +32,137 @@
     <div class="row">
         <div class="col-md-8">
             {{-- Produktai --}}
-            @if($order->items->count())
-                <h5 class="mt-4 text-primary">
-                    <i class="fas fa-shopping-basket me-2"></i> Produktai
-                </h5>
-                <div class="bg-light p-3 mb-4 rounded border border-primary shadow-sm">
-                    <div class="table-responsive">
-                        <table class="table table-hover align-middle">
-                            <thead class="table-primary">
+            @if($order->items->whereNotNull('product_id')->count())
+            <h5 class="mt-4 text-primary">
+                <i class="fas fa-shopping-basket me-2"></i> Produktai
+            </h5>
+            <div class="bg-light p-3 mb-4 rounded border border-primary shadow-sm">
+                <div class="table-responsive">
+                    <table class="table table-hover align-middle">
+                        <thead class="table-primary">
+                            <tr>
+                                <th>Prekė</th>
+                                <th>Pavadinimas</th>
+                                <th>Kiekis</th>
+                                <th>Suma</th>
+                                <th>Ar yra atvirukas</th>
+                                <th>Atviruko informacija</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            @php $totalPrice = 0; @endphp
+                            @foreach ($order->items->whereNotNull('product_id') as $item)
+                                @php
+                                    $itemTotal = $item->price * $item->quantity;
+                                    $totalPrice += $itemTotal;
+                                @endphp
                                 <tr>
-                                    <th>Prekė</th>
-                                    <th>Pavadinimas</th>
-                                    <th>Kiekis</th>
-                                    <th>Suma</th>
-                                    <th>Atvirukas</th>
-                                </tr>
-                            </thead>
-                            <tbody>
-                                @php $totalPrice = 0; @endphp
-                                @foreach($order->items as $item)
-                                    @php
-                                        $itemTotal = $item->price * $item->quantity;
-                                        $totalPrice += $itemTotal;
-                                    @endphp
-                                    <tr>
-                                        <td>
-                                            <img src="{{ asset('images/products/' . ($item->product->image ?? 'default.png')) }}" class="img-fluid" style="max-width: 80px; height: 80px;">
-                                        </td>
-                                        <td class="align-middle">{{ $item->product->name ?? 'Be pavadinimo' }}</td>
-                                        <td class="align-middle">{{ $item->quantity }}</td>
-                                        <td class="align-middle">{{ number_format($itemTotal, 2) }} €</td>
-                                        <td class="align-middle">
-                                            @if($item->postcard)
-                                                <i class="fas fa-check-circle text-success fs-5"></i>
+                                    <td>
+                                        <img src="{{ asset('images/products/' . ($item->product->image ?? 'default.png')) }}" class="img-fluid" style="max-width: 80px; height: 80px;">
+                                    </td>
+                                    <td class="align-middle">{{ $item->product->name ?? 'Be pavadinimo' }}</td>
+                                    <td class="align-middle">{{ $item->quantity }}</td>
+                                    <td class="align-middle">{{ number_format($itemTotal, 2) }} €</td>
+                                    <td class="align-middle">
+                                        @if($item->postcard)
+                                            <i class="fas fa-check-circle text-success fs-5"></i>
+                                        @else
+                                            <i class="fas fa-times-circle text-muted fs-5"></i>
+                                        @endif
+                                    </td>
+                                    <td class="align-middle">
+                                        @if($item->postcard)
+                                            @if($item->postcard->method === 'simple')
+                                                <strong>Šablonas:</strong> {{ $item->postcard->template }}<br>
+                                                <strong>Žinutė:</strong> {{ $item->postcard->message }}
+                                            @elseif($item->postcard->method === 'canva')
+                                                <strong>Canva failas:</strong>
+                                                @if($item->postcard->file_path)
+                                                    <a href="{{ asset($item->postcard->file_path) }}" target="_blank">Peržiūrėti</a>
+                                                @else
+                                                    Failas nepridėtas
+                                                @endif
                                             @else
-                                                <i class="fas fa-times-circle text-muted fs-5"></i>
+                                                <em>Nežinomas metodas</em>
                                             @endif
-                                        </td>
-                                    </tr>
-                                @endforeach
-                            </tbody>
-                        </table>
-                    </div>
+                                        @else
+                                            <span class="text-muted">–</span>
+                                        @endif
+                                    </td>
+                                </tr>
+                            @endforeach
+                        </tbody>
+                    </table>
                 </div>
-            @endif
+            </div>
+        @endif
 
-            {{-- Individualios puokštės --}}
-            @if($order->bouquets->count())
-                <h5 class="mt-4 text-warning">
-                    <i class="fas fa-seedling me-2"></i> Individualios puokštės
-                </h5>
-                <div class="bg-light p-3 mb-4 rounded border border-warning shadow-sm">
-                    <div class="table-responsive">
-                        <table class="table table-hover align-middle">
-                            <thead class="table-warning">
+
+
+        {{-- Individualios puokštės --}}
+        @if($order->items->whereNotNull('custom_bouquet_id')->count())
+            <h5 class="mt-4 text-warning">
+                <i class="fas fa-seedling me-2"></i> Individualios puokštės
+            </h5>
+            <div class="bg-light p-3 mb-4 rounded border border-warning shadow-sm">
+                <div class="table-responsive">
+                    <table class="table table-hover align-middle">
+                        <thead class="table-warning">
+                            <tr>
+                                <th>Sudėtis</th>
+                                <th>Kiekis</th>
+                                <th>Suma</th>
+                                <th>Ar yra atvirukas</th>
+                                <th>Atviruko informacija</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            @foreach($order->items->whereNotNull('custom_bouquet_id') as $item)
+                                @php
+                                    $bouquet = $item->customBouquet;
+                                    $bouquetItems = json_decode($bouquet->bouquet_data, true);
+                                @endphp
                                 <tr>
-                                    <th>Sudėtis</th>
-                                    <th>Kiekis</th>
-                                    <th>Suma</th>
-                                    <th>Atvirukas</th>
-                                </tr>
-                            </thead>
-                            <tbody>
-                                @foreach($order->bouquets as $bouquet)
-                                    @php
-                                        $bouquetItems = json_decode($bouquet->bouquet_data, true);
-                                        $totalPrice += $bouquet->total_price;
-                                    @endphp
-                                    <tr>
-                                        <td class="align-middle">
-                                            @foreach($bouquetItems as $flower)
-                                                - {{ $flower['name'] }} ({{ $flower['quantity'] }} vnt.)<br>
-                                            @endforeach
-                                        </td>
-                                        <td class="align-middle">1</td>
-                                        <td class="align-middle">{{ number_format($bouquet->total_price, 2) }} €</td>
-                                        <td class="align-middle">
-                                            @if($bouquet->postcard)
-                                                <i class="fas fa-check-circle text-success fs-5"></i>
+                                    <td class="align-middle">
+                                        @foreach($bouquetItems as $flower)
+                                            - {{ $flower['name'] }} ({{ $flower['quantity'] }} vnt.)<br>
+                                        @endforeach
+                                    </td>
+                                    <td class="align-middle">{{ $item->quantity }}</td>
+                                    <td class="align-middle">{{ number_format($item->price, 2) }} €</td>
+                                    <td class="align-middle">
+                                        @if($item->postcard)
+                                            <i class="fas fa-check-circle text-success fs-5"></i>
+                                        @else
+                                            <i class="fas fa-times-circle text-muted fs-5"></i>
+                                        @endif
+                                    </td>
+                                    <td class="align-middle">
+                                        @if($item->postcard)
+                                            @if($item->postcard->method === 'simple')
+                                                <strong>Šablonas:</strong> {{ $item->postcard->template }}<br>
+                                                <strong>Žinutė:</strong> {{ $item->postcard->message }}
+                                            @elseif($item->postcard->method === 'canva')
+                                                <strong>Canva failas:</strong>
+                                                @if($item->postcard->file_path)
+                                                    <a href="{{ asset($item->postcard->file_path) }}" target="_blank">Peržiūrėti</a>
+                                                @else
+                                                    Failas nepridėtas
+                                                @endif
                                             @else
-                                                <i class="fas fa-times-circle text-muted fs-5"></i>
+                                                <em>Nežinomas metodas</em>
                                             @endif
-                                        </td>
-                                    </tr>
-                                @endforeach
-                            </tbody>
-                        </table>
-                    </div>
+                                        @else
+                                            <span class="text-muted">–</span>
+                                        @endif
+                                    </td>
+                                </tr>
+                            @endforeach
+                        </tbody>
+                    </table>
                 </div>
-            @endif
-
+            </div>
+        @endif
             {{-- Prenumeratos --}}
             @if($order->subscriptions->count())
                 <h5 class="mt-4 text-info">

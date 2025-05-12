@@ -64,7 +64,7 @@ class BouquetController extends Controller
                 'method' => $request->postcard_method ?? 'simple',
                 'template' => $request->postcard_template,
                 'message' => $request->postcard_message,
-                'uploaded_file' => $path_to_file,
+                'file_path' => $path_to_file,
             ];
         }
     

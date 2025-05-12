@@ -34,6 +34,9 @@
                     <a href="/admin/reviews" class="list-group-item list-group-item-action active" style="border-radius: 0;">
                     <i class="fas fa-comments me-2"></i> Atsiliepimų moderavimas
                     </a>
+                    <a href="/admin/special_offers" class="list-group-item list-group-item-action logout-link" style="border-radius: 0;">
+                        <i class="fas fa-tags me-2"></i> Akcijų valdymas
+                    </a>
                     <a href="#" class="list-group-item list-group-item-action logout-link" onclick="event.preventDefault(); document.getElementById('logout-form').submit();" style="border-radius: 0;">
                         <i class="fas fa-sign-out-alt"></i> Atsijungti
                         </a>
@@ -78,9 +81,12 @@
                 @empty
                 <div class="alert alert-info mb-0 text-center">Atsiliepimų nerasta.</div>
                 @endforelse
+                <p class="text-muted text-center mt-4">
+                    Rodoma {{ $reviews->firstItem() }}–{{ $reviews->lastItem() }} iš {{ $reviews->total() }} atsiliepimų
+                </p>  
                 <div class="mt-4">
-    {{ $reviews->appends(request()->query())->links() }}
-</div>
+                 {{ $reviews->appends(request()->query())->links() }}
+                </div>
             </div>
         </div>
     </div>

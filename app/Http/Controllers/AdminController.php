@@ -244,7 +244,7 @@ public function storeUser(Request $request)
 
 public function showSpecialOffers()
 {
-    $offers = SpecialOffer::latest()->get();
+    $offers = SpecialOffer::latest()->paginate(6);
     return view('admin.special_offers.index', compact('offers'));
 }
 

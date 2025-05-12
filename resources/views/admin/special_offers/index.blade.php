@@ -70,6 +70,13 @@
                     <div class="alert alert-info text-center">Akcijų dar nėra.</div>
                 @endforelse
             </div>
+            <p class="text-muted text-center mt-4">
+                Rodoma {{ $offers->firstItem() }}–{{ $offers->lastItem() }} iš {{ $offers->total() }} akcijų
+            </p>
+            <div class="d-flex justify-content-center">
+                {{ $offers->links() }} <!-- Šis metodas veiks tik su puslapiuota kolekcija -->
+            </div>
+
         </div>
     </div>
 </div>

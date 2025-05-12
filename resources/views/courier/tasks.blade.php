@@ -138,7 +138,18 @@
             @empty
                 <div class="alert alert-info">Šiuo metu nėra jokių užduočių.</div>
             @endforelse
+            @if($ordersRaw->total())
+    <p class="text-muted text-center mt-4">
+        Rodoma {{ $ordersRaw->firstItem() }}–{{ $ordersRaw->lastItem() }} iš {{ $ordersRaw->total() }} užsakymų
+    </p>
+
+    <div class="d-flex justify-content-center mt-3">
+        {{ $ordersRaw->appends(request()->query())->links() }}
+    </div>
+@endif
+
         </div>
     </div>
+
 </div>
 @endsection
