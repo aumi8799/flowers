@@ -34,6 +34,9 @@
                 <a href="/admin/reviews" class="list-group-item list-group-item-action logout-link" style="border-radius: 0;">
                 <i class="fas fa-comments me-2"></i> Atsiliepimų moderavimas
                 </a>
+                <a href="/admin/special_offers" class="list-group-item list-group-item-action logout-link" style="border-radius: 0;">
+                    <i class="fas fa-tags me-2"></i> Akcijų valdymas
+                </a>
                 <a href="#" class="list-group-item list-group-item-action logout-link" onclick="event.preventDefault(); document.getElementById('logout-form').submit();" style="border-radius: 0;">
                     <i class="fas fa-sign-out-alt"></i> Atsijungti
                     </a>
@@ -89,6 +92,17 @@
                                 <div class="card-body">
                                     <i class="fas fa-comments fa-3x text-muted"></i>
                                     <h5 class="card-title mt-3">Atsiliepimų moderavimas</h5>
+                                </div>
+                            </div>
+                        </a>
+                    </div>
+
+                    <div class="col-md-4">
+                        <a href="/admin/special_offers" class="text-decoration-none text-dark">
+                            <div class="card text-center border" style="border-radius: 0;">
+                                <div class="card-body">
+                                    <i class="fas fa-tags fa-3x text-muted"></i>
+                                    <h5 class="card-title mt-3">Akcijų valdymas</h5>
                                 </div>
                             </div>
                         </a>

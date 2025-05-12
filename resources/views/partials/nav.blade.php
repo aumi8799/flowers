@@ -113,6 +113,7 @@
                         <ul class="dropdown-menu-custom">
                             <li><a class="dropdown-item-custom" href="/subscriptions">Puokščių Prenumerata</a></li>
                             <li><a class="dropdown-item-custom" href="/giftcoupons">Dovanų Kuponai</a></li>
+                            <li><a class="dropdown-item-custom" href="/special_offers">Specialūs pasiūlymai</a></li>
                         </ul>
                     </li>
                     <li class="nav-item"><a class="nav-link" href="{{ route('decoration') }}">DEKORAVIMO PASLAUGOS</a></li>

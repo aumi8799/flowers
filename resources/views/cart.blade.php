@@ -13,6 +13,13 @@
     </header>
 
     <div class="container my-5">
+    @if(session('special_discount_code'))
+        <div class="alert alert-success">
+            Pritaikyta nuolaida kodu <strong>{{ session('special_discount_code') }}</strong>! 
+            ({{ session('special_discount_value') * 100 }}% nuolaida)
+        </div>
+    @endif
+
     @if(session('success'))
         <div class="alert alert-success">{{ session('success') }}</div>
     @endif
@@ -209,19 +216,28 @@
                             </form>
                         @endif
                         <!-- Lojalumo taškų forma -->
-                        <form action="{{ route('loyalty.apply') }}" method="POST" class="mb-3">
-                            @csrf
-                            <label for="used_points" class="form-label">Norite pritaikyti lojalumo taškus?</label>
-                            <div class="input-group">
-                                <input type="number" name="used_points" id="used_points" class="form-control"
-                                    min="1" max="{{ auth()->user()->total_points }}"
-                                    value="{{ session('loyalty_points_used', 0) }}" required>
-                                <button class="btn btn-outline-success" type="submit">Panaudoti taškus</button>
-                            </div>
-                            <div class="form-text">
-                                Turite <strong>{{ auth()->user()->total_points }}</strong> taškų. 1 taškas = 0.10 € nuolaida.
-                            </div>
-                        </form>
+                        @auth
+                            <form action="{{ route('loyalty.apply') }}" method="POST" class="mb-3">
+                                @csrf
+                                <label for="used_points" class="form-label">Norite pritaikyti lojalumo taškus?</label>
+                                <div class="input-group">
+                                    <input type="number" name="used_points" id="used_points" class="form-control"
+                                        min="1" max="{{ auth()->user()->total_points }}"
+                                        value="{{ session('loyalty_points_used', 0) }}" required>
+                                    <button class="btn btn-outline-success" type="submit">Panaudoti taškus</button>
+                                </div>
+                                <div class="form-text">
+                                    Turite <strong>{{ auth()->user()->total_points }}</strong> taškų. 1 taškas = 0.10 € nuolaida.
+                                </div>
+                            </form>
+                        @endauth
+
+                        @guest
+                            <p class="mt-3">
+                                Lojalumo taškus gali naudoti tik <a href="{{ route('login') }}" class="text-success">prisijungę</a> vartotojai.
+                            </p>
+                        @endguest
+
 
                         @if(session('loyalty_discount'))
                             <div class="text-success">
@@ -392,6 +408,9 @@
     let couponDiscount = @json(session('gift_coupon_discount', 0));
     let loyaltyDiscount = @json(session('loyalty_discount', 0));
     let cartHasSubscription = @json($hasSubscription);
+    let specialDiscountPercent = @json(session('special_discount_value', 0));
+    let specialDiscount = totalPrice * specialDiscountPercent;
+
 
     function updateShippingCost() {
         const citySelect = document.getElementById('delivery-city-select');
@@ -411,24 +430,26 @@
         const videoCost = videoCheckbox && videoCheckbox.checked ? 5 : 0;
         document.getElementById('hidden-video').value = videoCheckbox.checked ? 1 : 0;
 
-        // 1. Taikome kupono nuolaidą
-        let usedCoupon = Math.min(totalPrice, couponDiscount);
-        let remainingCoupon = couponDiscount - usedCoupon;
-        let priceAfterCoupon = totalPrice - usedCoupon;
+        // 1. Taikome specialią nuolaidą procentais
+        let priceAfterSpecial = totalPrice - specialDiscount;
 
-        // 2. Taikome lojalumo nuolaidą nuo likusios sumos
+        // 2. Taikome dovanų kuponą
+        let usedCoupon = Math.min(priceAfterSpecial, couponDiscount);
+        let remainingCoupon = couponDiscount - usedCoupon;
+        let priceAfterCoupon = priceAfterSpecial - usedCoupon;
+
+        // 3. Lojalumas
         let usedLoyalty = Math.min(priceAfterCoupon, loyaltyDiscount);
         let priceAfterLoyalty = priceAfterCoupon - usedLoyalty;
 
-        // 3. Pristatymo ir video išlaidų skaičiavimas
+        // 4. Papildomos išlaidos
         let extraCosts = shippingCost + videoCost;
-
-        // 4. Jei dar liko kupono vertės, pritaikom ją papildomiems mokesčiams
         let coveredExtras = Math.min(remainingCoupon, extraCosts);
         let finalExtras = extraCosts - coveredExtras;
 
         // 5. Galutinė suma
         const updatedTotal = priceAfterLoyalty + finalExtras;
+
 
         document.getElementById('shipping-cost').textContent = shippingCost;
         document.getElementById('total-cost').textContent = updatedTotal;

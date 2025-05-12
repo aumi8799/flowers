@@ -8,6 +8,9 @@ use App\Models\Order;
 use App\Models\Review;
 use App\Models\GiftCoupon;
 use Illuminate\Support\Facades\Hash;
+use App\Models\SpecialOffer;
+use Illuminate\Support\Facades\Storage;
+
 
 class AdminController extends Controller
 {
@@ -238,4 +241,95 @@ public function storeUser(Request $request)
 
     return redirect()->route('admin.users')->with('success', 'Vartotojas sėkmingai sukurtas!');
 }
+
+public function showSpecialOffers()
+{
+    $offers = SpecialOffer::latest()->get();
+    return view('admin.special_offers.index', compact('offers'));
+}
+
+public function createSpecialOffer()
+{
+    return view('admin.special_offers.create');
+}
+
+public function storeSpecialOffer(Request $request)
+{
+    $request->validate([
+        'title' => 'required|string|max:255',
+        'code' => 'required|string|max:50|unique:special_offers,code',
+        'discount' => 'required|numeric|min:1|max:100',
+        'description' => 'nullable|string',
+        'valid_until' => 'nullable|date',
+        'image' => 'nullable|image|mimes:jpeg,png,jpg,gif|max:2048',
+    ]);
+
+    $imageName = null;
+    if ($request->hasFile('image')) {
+        $imageName = time() . '_' . $request->image->getClientOriginalName();
+        $request->image->move(public_path('images/special_offers'), $imageName);
+    }
+
+    SpecialOffer::create([
+        'title' => $request->title,
+        'code' => strtoupper($request->code),
+        'discount' => $request->discount / 100,
+        'description' => $request->description,
+        'valid_until' => $request->valid_until,
+        'image' => $imageName,
+    ]);
+
+    return redirect()->route('admin.special_offers.index')->with('success', 'Pasiūlymas sukurtas sėkmingai!');
+}
+
+public function editSpecialOffer($id)
+{
+    $offer = SpecialOffer::findOrFail($id);
+    return view('admin.special_offers.edit', compact('offer'));
+}
+
+public function updateSpecialOffer(Request $request, $id)
+{
+    $offer = SpecialOffer::findOrFail($id);
+
+    $request->validate([
+        'title' => 'required|string|max:255',
+        'code' => 'required|string|max:50|unique:special_offers,code,' . $offer->id,
+        'discount' => 'required|numeric|min:1|max:100',
+        'description' => 'nullable|string',
+        'valid_until' => 'nullable|date',
+        'image' => 'nullable|image|mimes:jpeg,png,jpg,gif|max:2048',
+    ]);
+
+    if ($request->hasFile('image')) {
+        if ($offer->image) {
+            @unlink(public_path('images/special_offers/' . $offer->image));
+        }
+        $imageName = time() . '_' . $request->image->getClientOriginalName();
+        $request->image->move(public_path('images/special_offers'), $imageName);
+        $offer->image = $imageName;
+    }
+
+    $offer->update([
+        'title' => $request->title,
+        'code' => strtoupper($request->code),
+        'discount' => $request->discount / 100,
+        'description' => $request->description,
+        'valid_until' => $request->valid_until,
+    ]);
+
+    return redirect()->route('admin.special_offers.index')->with('success', 'Akcija atnaujinta.');
+}
+
+public function destroySpecialOffer($id)
+{
+    $offer = SpecialOffer::findOrFail($id);
+    if ($offer->image) {
+        @unlink(public_path('images/special_offers/' . $offer->image));
+    }
+    $offer->delete();
+    return redirect()->route('admin.special_offers.index')->with('success', 'Akcija pašalinta.');
+}
+
+
 }

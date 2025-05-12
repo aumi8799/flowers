@@ -156,6 +156,14 @@ Route::delete('/admin/coupons/{id}', [App\Http\Controllers\AdminController::clas
 Route::get('/admin/coupons/{coupon}/edit', [AdminController::class, 'editCoupon'])->name('admin.coupons.edit');
 Route::put('/admin/coupons/{coupon}', [AdminController::class, 'updateCoupon'])->name('admin.coupons.update');
 
+Route::get('/admin/special_offers', [AdminController::class, 'showSpecialOffers'])->name('admin.special_offers.index');
+Route::get('/admin/special_offers/create', [AdminController::class, 'createSpecialOffer'])->name('admin.special_offers.create');
+Route::post('/admin/special_offers', [AdminController::class, 'storeSpecialOffer'])->name('admin.special_offers.store');
+Route::get('/admin/special_offers/{id}/edit', [AdminController::class, 'editSpecialOffer'])->name('admin.special_offers.edit');
+Route::put('/admin/special_offers/{id}', [AdminController::class, 'updateSpecialOffer'])->name('admin.special_offers.update');
+Route::delete('/admin/special_offers/{id}', [AdminController::class, 'destroySpecialOffer'])->name('admin.special_offers.destroy');
+
+
 Route::middleware(['auth', 'role:courier'])->group(function () {
     Route::get('/courier', [CourierController::class, 'index'])->name('courier.dashboard');
 });
@@ -193,3 +201,10 @@ Route::post('/bouquet/store', [BouquetController::class, 'store'])->name('bouque
 use App\Http\Controllers\LoyaltyController;
 
 Route::post('/loyalty/apply', [LoyaltyController::class, 'apply'])->name('loyalty.apply');
+
+use App\Http\Controllers\SpecialOfferController;
+Route::post('/discount-code/apply', [SpecialOfferController::class, 'apply'])->name('discount.apply');
+Route::post('/discount-code/remove', [SpecialOfferController::class, 'remove'])->name('discount.remove');
+Route::get('/special_offers', [SpecialOfferController::class, 'index'])->name('special_offers.index');
+Route::post('/special_offers/apply', [SpecialOfferController::class, 'apply'])->name('special_offers.apply');
+
