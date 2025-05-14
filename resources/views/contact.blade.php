@@ -34,22 +34,24 @@
 
                 <div class="col-md-6">
                     <h4>Rašykite mums</h4>
-                    <form>
+                    <form action="{{ route('contact.send') }}" method="POST">
+                        @csrf
                         <div class="mb-3">
                             <label for="name" class="form-label">Jūsų vardas</label>
-                            <input type="text" class="form-control" id="name" placeholder="Įveskite vardą">
+                            <input type="text" name="name" class="form-control" id="name" placeholder="Įveskite vardą" required>
                         </div>
                         <div class="mb-3">
                             <label for="email" class="form-label">El. paštas</label>
-                            <input type="email" class="form-control" id="email" placeholder="Įveskite el. paštą">
+                            <input type="email" name="email" class="form-control" id="email" placeholder="Įveskite el. paštą" required>
                         </div>
                         <div class="mb-3">
                             <label for="message" class="form-label">Žinutė</label>
-                            <textarea class="form-control" id="message" rows="4" placeholder="Jūsų žinutė"></textarea>
+                            <textarea name="message" class="form-control" id="message" rows="4" placeholder="Jūsų žinutė" required></textarea>
                         </div>
                         <button type="submit" class="btn btn-primary">Siųsti</button>
                     </form>
                 </div>
+
             </div>
         </div>
     </section>

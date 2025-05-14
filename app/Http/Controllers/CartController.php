@@ -47,9 +47,10 @@ class CartController extends Controller
             'method' => $request->postcard_method ?? 'simple',
             'template' => $request->postcard_template ?? null,
             'message' => $request->postcard_message ?? '',
-            'uploaded_file' => $path_to_file,
+            'file_path' => $path_to_file,
         ];
     }
+
 
     session()->put('cart', $cart);
 

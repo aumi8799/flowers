@@ -155,18 +155,6 @@ foreach ($cart as $item) {
             }
         }
 
-        foreach ($cart as $item) {
-            if (isset($item['postcard']) && !empty($item['postcard'])) {
-                \App\Models\Postcard::create([
-                    'order_id' => $order->id,
-                    'template' => $item['postcard']['template'] ?? 'numatytas',
-                    'message' => $item['postcard']['message'] ?? '',
-                    'method' => $item['postcard']['method'] ?? null,
-                    'file_path' => $item['postcard']['file_path'] ?? null,
-                ]);
-            }
-        }
-
         if (session('gift_coupon_code')) {
             $coupon = GiftCoupon::where('code', session('gift_coupon_code'))->first();
             if ($coupon && !$coupon->used) {

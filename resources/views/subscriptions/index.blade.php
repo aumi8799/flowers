@@ -120,6 +120,9 @@
             </div>
             @endforeach
         </div>
+                        <p class="text-muted text-center mt-4">
+                    Rodoma {{ $subscriptions->firstItem() }}–{{ $subscriptions->lastItem() }} iš {{ $subscriptions->total() }} prenumeratų
+                </p>   
         <div class="mt-4 ">
     {{ $subscriptions->appends(request()->query())->links() }}
 </div>

@@ -40,6 +40,23 @@ Route::get('/decoration', function () {
     return view('decoration');
 })->name('decoration');
 
+Route::get('/decorations/wedding', function () {
+    return view('decorations.wedding');
+})->name('wedding.decor');
+
+Route::get('/decorations/birthday', function () {
+    return view('decorations.birthday');
+})->name('birthday.decor');
+
+Route::get('/decorations/corporate', function () {
+    return view('decorations.corporate');
+})->name('corporate.decor');
+
+use App\Http\Controllers\DecorationController;
+
+// Užsakymo maršrutas
+Route::post('/decorations/order/{type}', [DecorationController::class, 'order'])->name('decorations.order');
+
 Route::get('/special', function () {
     return view('special');
 })->name('special');
@@ -163,6 +180,10 @@ Route::get('/admin/special_offers/{id}/edit', [AdminController::class, 'editSpec
 Route::put('/admin/special_offers/{id}', [AdminController::class, 'updateSpecialOffer'])->name('admin.special_offers.update');
 Route::delete('/admin/special_offers/{id}', [AdminController::class, 'destroySpecialOffer'])->name('admin.special_offers.destroy');
 
+Route::get('/admin/decor_orders', [AdminController::class, 'showDecorOrders'])->name('admin.decor_orders');
+Route::get('/admin/decor_orders/{id}', [AdminController::class, 'viewDecorOrder'])->name('admin.decor_orders.show');
+Route::get('/admin/decor_orders/{id}/edit', [AdminController::class, 'editDecorOrder'])->name('admin.decor_orders.edit');
+Route::put('/admin/decor_orders/{id}', [AdminController::class, 'updateDecorOrder'])->name('admin.decor_orders.update');
 
 Route::middleware(['auth', 'role:courier'])->group(function () {
     Route::get('/courier', [CourierController::class, 'index'])->name('courier.dashboard');
@@ -207,4 +228,7 @@ Route::post('/discount-code/apply', [SpecialOfferController::class, 'apply'])->n
 Route::post('/discount-code/remove', [SpecialOfferController::class, 'remove'])->name('discount.remove');
 Route::get('/special_offers', [SpecialOfferController::class, 'index'])->name('special_offers.index');
 Route::post('/special_offers/apply', [SpecialOfferController::class, 'apply'])->name('special_offers.apply');
+Route::post('/special-offers/remove', [SpecialOfferController::class, 'remove'])->name('special_offers.remove');
 
+use App\Http\Controllers\ContactController;
+Route::post('/contact', [ContactController::class, 'send'])->name('contact.send');

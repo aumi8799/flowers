@@ -90,4 +90,14 @@ class User extends Authenticatable
     {
         return $this->loyaltyPoints()->sum('points');
     }
+protected static function booted()
+{
+    static::deleting(function ($user) {
+        // Atjungti user_id iš susijusių įrašų, bet palikti pačius įrašus DB
+        $user->orders()->update(['user_id' => null]);
+        $user->subscriptions()->update(['user_id' => null]);
+        $user->reviews()->update(['user_id' => null]);
+    });
+}
+
 }

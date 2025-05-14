@@ -6,7 +6,6 @@
     <header class="py-5" style="background: url('{{ asset('images/header-bg.jpg') }}') no-repeat center center; background-size: cover; height: 200px; display: flex; align-items: center; justify-content: center;">
         <div class="container px-4 px-lg-5 my-5">
             <div class="text-center text-dark-gray">
-                <h1 class="display-4 fw-bolder">Administratoriaus valdymo skydelis</h1>
 
             </div>
         </div>
@@ -36,6 +35,9 @@
                 </a>
                 <a href="/admin/special_offers" class="list-group-item list-group-item-action logout-link" style="border-radius: 0;">
                     <i class="fas fa-tags me-2"></i> Akcijų valdymas
+                </a>
+                <a href="/admin/decor_orders" class="list-group-item list-group-item-action logout-link" style="border-radius: 0;">
+                    <i class="fas fa-swatchbook me-2"></i> Dekoravimo užklausos
                 </a>
                 <a href="#" class="list-group-item list-group-item-action logout-link" onclick="event.preventDefault(); document.getElementById('logout-form').submit();" style="border-radius: 0;">
                     <i class="fas fa-sign-out-alt"></i> Atsijungti
@@ -103,6 +105,17 @@
                                 <div class="card-body">
                                     <i class="fas fa-tags fa-3x text-muted"></i>
                                     <h5 class="card-title mt-3">Akcijų valdymas</h5>
+                                </div>
+                            </div>
+                        </a>
+                    </div>
+
+                    <div class="col-md-4">
+                        <a href="/admin/decor_orders" class="text-decoration-none text-dark">
+                            <div class="card text-center border" style="border-radius: 0;">
+                                <div class="card-body">
+                                    <i class="fas fa-swatchbook fa-3x text-muted"></i>
+                                    <h5 class="card-title mt-3">Dekoravimo užklausos</h5>
                                 </div>
                             </div>
                         </a>

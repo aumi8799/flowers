@@ -36,6 +36,9 @@
                 <a href="/admin/special_offers" class="list-group-item list-group-item-action logout-link" style="border-radius: 0;">
                     <i class="fas fa-tags me-2"></i> Akcijų valdymas
                 </a>
+                <a href="/admin/decor_orders" class="list-group-item list-group-item-action logout-link" style="border-radius: 0;">
+                    <i class="fas fa-swatchbook me-2"></i> Dekoravimo užklausos
+                </a>
                 <a href="#" class="list-group-item list-group-item-action logout-link"
                    onclick="event.preventDefault(); document.getElementById('logout-form').submit();">
                     <i class="fas fa-sign-out-alt"></i> Atsijungti

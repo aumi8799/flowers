@@ -10,6 +10,10 @@ use App\Models\GiftCoupon;
 use Illuminate\Support\Facades\Hash;
 use App\Models\SpecialOffer;
 use Illuminate\Support\Facades\Storage;
+use App\Models\DecorationOrder;
+use App\Mail\DecorationOrderRejectedMail;
+use Illuminate\Support\Facades\Mail;
+use App\Mail\DecorationOrderInProgressMail;
 
 
 class AdminController extends Controller
@@ -329,6 +333,72 @@ public function destroySpecialOffer($id)
     }
     $offer->delete();
     return redirect()->route('admin.special_offers.index')->with('success', 'Akcija pašalinta.');
+}
+
+// Rodyti visus užsakymus
+    public function showDecorOrders()
+    {
+        $orders = DecorationOrder::latest()->paginate(6); // Puslapiavimas
+        return view('admin.decor_orders.index', compact('orders'));
+    }
+
+    // Rodyti užsakymo peržiūros puslapį
+    public function viewDecorOrder($id)
+    {
+        $order = DecorationOrder::findOrFail($id);
+        return view('admin.decor_orders.show', compact('order'));
+    }
+
+    // Rodyti užsakymo redagavimo formą
+    public function editDecorOrder($id)
+    {
+        $order = DecorationOrder::findOrFail($id);
+        return view('admin.decor_orders.edit', compact('order'));
+    }
+
+    // Atnaujinti užsakymą
+    public function updateDecorOrder(Request $request, $id)
+{
+    $order = DecorationOrder::findOrFail($id);
+
+    // Validacija
+    $request->validate([
+        'event_date' => 'required|date',
+        'location' => 'required|string|max:255',
+        'budget' => 'required|numeric|min:0',
+        'name' => 'required|string|max:255',
+        'email' => 'required|email|max:255',
+        'status' => 'required|in:pateiktas,vykdomas,atliktas,atmestas',
+        'rejection_reason' => 'required_if:status,atmestas|string|nullable',
+    ]);
+
+    // Atnaujinti užsakymą
+    $order->event_date = $request->event_date;
+    $order->location = $request->location;
+    $order->guests_count = $request->guests_count;
+    $order->tables_count = $request->tables_count;
+    $order->flowers = $request->flowers;
+    $order->color_scheme = $request->color_scheme;
+    $order->style = $request->style;
+    $order->budget = $request->budget;
+    $order->name = $request->name;
+    $order->email = $request->email;
+    $order->comments = $request->comments;
+    $order->package = $request->package;
+    $order->type = 'corporate';  // Įmonių renginio tipas
+    $order->status = $request->status;
+
+    $order->save();
+
+    if ($request->status === 'atmestas' && $request->filled('rejection_reason')) {
+        Mail::to($order->email)->send(new \App\Mail\DecorationOrderRejectedMail($order, $request->rejection_reason));
+    }
+
+    if ($request->status === 'vykdomas') {
+        Mail::to($order->email)->send(new DecorationOrderInProgressMail($order));
+    }
+
+    return redirect()->route('admin.decor_orders')->with('success', 'Užsakymas sėkmingai atnaujintas!');
 }
 
 

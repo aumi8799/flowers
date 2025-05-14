@@ -43,4 +43,5 @@ class SpecialOfferController extends Controller
 
         return view('special_offers.index', compact('offers'));
     }
+    
 }

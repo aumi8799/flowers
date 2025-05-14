@@ -24,7 +24,7 @@
             <p>{{ $product->description }}</p>
             <p><strong>Kaina:</strong> €{{ $product->price }}</p>
 
-            <form action="{{ route('cart.add') }}" method="POST" onsubmit="return validateForm()">
+            <form action="{{ route('cart.add') }}" method="POST" enctype="multipart/form-data" onsubmit="return validateForm()">
                 @csrf
                 <input type="hidden" name="id" value="{{ $product->id }}">
                 <input type="hidden" name="name" value="{{ $product->name }}">

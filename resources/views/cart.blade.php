@@ -13,13 +13,6 @@
     </header>
 
     <div class="container my-5">
-    @if(session('special_discount_code'))
-        <div class="alert alert-success">
-            Pritaikyta nuolaida kodu <strong>{{ session('special_discount_code') }}</strong>! 
-            ({{ session('special_discount_value') * 100 }}% nuolaida)
-        </div>
-    @endif
-
     @if(session('success'))
         <div class="alert alert-success">{{ session('success') }}</div>
     @endif
@@ -36,7 +29,19 @@
     @else
         <div class="row">
             <div class="col-md-8">
-
+    @if(session('special_discount_code'))
+        <div class="alert alert-success">
+            Pritaikyta nuolaida kodu <strong>{{ session('special_discount_code') }}</strong>! 
+            ({{ session('special_discount_value') * 100 }}% nuolaida)
+            <!-- Pašalinimo mygtukas -->
+            <form action="{{ route('special_offers.remove') }}" method="POST" class="mt-2">
+                @csrf
+                <button type="submit" class="btn btn-danger btn-sm">
+                    Pašalinti nuolaidos kodą
+                </button>
+            </form>
+        </div>
+    @endif
                 @php $hasProducts = collect($cart)->filter(fn($item) => in_array($item['type'], ['product', 'custom_bouquet'])); @endphp
                 @if($hasProducts->isNotEmpty())
                     <h5 class="mt-4 text-primary">

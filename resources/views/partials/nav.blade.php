@@ -39,7 +39,8 @@
                             <li><a class="dropdown-item-custom" href="/admin/orders">Užsakymų valdymas</a></li>
                             <li><a class="dropdown-item-custom" href="/admin/coupons">Dovanų kuponų valdymas</a></li>   
                             <li><a class="dropdown-item-custom" href="/admin/reviews">Atsiliepimų valdymas</a></li>      
-                            <li><a class="dropdown-item-custom" href="/admin/special_offers">Akcijų valdymas</a></li>                  
+                            <li><a class="dropdown-item-custom" href="/admin/special_offers">Akcijų valdymas</a></li>   
+                            <li><a class="dropdown-item-custom" href="/admin/decor_orders">Dekoravimo užklausos</a></li>                
                             @endif
                             @if(!$isCourier && !$isAdmin)
                                 <li><a class="dropdown-item-custom" href="/orders">Užsakymai</a></li>
@@ -117,7 +118,16 @@
                             <li><a class="dropdown-item-custom" href="/special_offers">Specialūs pasiūlymai</a></li>
                         </ul>
                     </li>
-                    <li class="nav-item"><a class="nav-link" href="{{ route('decoration') }}">DEKORAVIMO PASLAUGOS</a></li>
+                    <li class="nav-item dropdown-hover">
+                        <a class="nav-link" href="{{ route('decoration') }}">DEKORAVIMO PASLAUGOS</a>
+                        <ul class="dropdown-menu-custom">
+                            <li><a class="dropdown-item-custom" href="{{ route('wedding.decor') }}">Vestuvių dekoravimas</a></li>
+                            <li><a class="dropdown-item-custom" href="{{ route('birthday.decor') }}">Gimtadenio dekoravimas</a></li>
+                            <li><a class="dropdown-item-custom" href="{{ route('corporate.decor') }}">Įmonių renginių dekoravimas</a></li>
+                        </ul>
+                    </li>
+
+
                     <li class="nav-item"><a class="nav-link" href="{{ route('contact') }}">KONTAKTAI</a></li>
                     <li class="nav-item"><a class="nav-link" href="/reviews">ATSILIEPIMAI</a></li>
                 </ul>

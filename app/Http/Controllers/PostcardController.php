@@ -12,22 +12,4 @@ class PostcardController extends Controller
     {
         return view('postcard.create', ['orderId' => $orderId]);
     }
-
-    public function store(Request $request)
-    {
-        $request->validate([
-            'order_id' => 'required|exists:orders,id',
-            'template' => 'required|string',
-            'message' => 'required|string|max:255',
-        ]);
-
-        Postcard::create([
-            'order_id' => $request->order_id,
-            'template' => $request->template,
-            'message' => $request->message,
-        ]);
-
-        return redirect()->route('orders.show', $request->order_id)
-            ->with('success', 'Atvirukas pridėtas!');
-    }
 }

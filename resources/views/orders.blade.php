@@ -112,7 +112,9 @@
                         </div>
                     @endforeach
                 </div>
-
+                <p class="text-muted text-center mt-4">
+                    Rodoma {{ $orders->firstItem() }}–{{ $orders->lastItem() }} iš {{ $orders->total() }} užsakymų
+                </p>   
                 {{-- Puslapiavimas per vidurį --}}
                 <div class="text-center mt-4">
                     {{ $orders->appends(request()->query())->links() }}
